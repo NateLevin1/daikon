@@ -15,8 +15,8 @@ import daikon.chicory.ParameterInfo;
 import daikon.chicory.ReturnInfo;
 import daikon.chicory.RootInfo;
 import daikon.chicory.StaticObjInfo;
-import daikon.chicory.StringInfo;
 import daikon.chicory.ThisObjInfo;
+import daikon.chicory.VarFlags;
 import daikon.plumelib.bcelutil.SimpleLog;
 import daikon.plumelib.util.WeakIdentityHashMap;
 import java.io.PrintWriter;
@@ -1386,9 +1386,8 @@ public final class DCRuntime implements ComparabilityProvider {
       merge_dv.log("merge_comparability: checking var %s = '%s' %n", dv, obj_str(obj));
     }
 
-    // Ignore ClassInfo and StringInfo variables.  These are not real
-    // variables in the program
-    if ((dv instanceof DaikonClassInfo) || (dv instanceof StringInfo)) {
+    // Ignore synthetic variables.  These are not real variables in the program
+    if (dv.get_var_flags().contains(VarFlags.SYNTHETIC)) {
       debug_timing.log("  Variable %s : %d msecs%n", dv, System.currentTimeMillis() - start_millis);
       return;
     }

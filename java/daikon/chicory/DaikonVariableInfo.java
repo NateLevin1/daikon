@@ -1028,6 +1028,7 @@ public abstract class DaikonVariableInfo
     // checkForImplicitList(cinfo, type, name, offset, depth);
 
     checkForRuntimeClass(type, theName, offset); // .class var
+    checkForClassType(type, theName, offset); // .getType() var
     checkForString(type, theName, offset); // .tostring var
   }
 
@@ -1089,6 +1090,32 @@ public abstract class DaikonVariableInfo
             (offset + theName).contains("[]"));
 
     addChild(classInfo);
+  }
+
+  /**
+   * Checks the given type to see if it is a Class<?>. If so, it adds the correct child to this
+   * node.
+   */
+  private void checkForClassType(Class<?> type, String theName, String offset) {
+    if (!type.equals(Class.class)) {
+      return;
+    }
+
+    String postString = ""; // either array braces or an empty string
+    if (isArray) {
+      postString = "[]";
+    }
+
+    // add DaikonVariableInfo type
+    DaikonVariableInfo classTypeInfo =
+        new ClassTypeInfo(
+            offset + theName + ".getType()",
+            stringClassName + postString,
+            stringClassName + postString,
+            offset + theName,
+            isArray);
+
+    addChild(classTypeInfo);
   }
 
   /**
