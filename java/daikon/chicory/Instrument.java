@@ -145,6 +145,17 @@ public class Instrument extends InstructionListUtils implements ClassFileTransfo
 
     debug_transform.log("In chicory.Instrument.transform(): class = %s%n", className);
 
+    // If the user specified to only instrument certain classes, then
+    // instrument only those classes
+    if (Chicory.instrument_only != null) {
+      Matcher matcher = Chicory.instrument_only.matcher(fullClassName);
+      if (!matcher.find()) {
+        debug_transform.log(
+            "ignoring class %s, doesn't match instrument_only regex%n", fullClassName);
+        return null;
+      }
+    }
+
     // Don't instrument boot classes.  They are uninteresting and will
     // not be able to access daikon.chicory.Runtime (because it is not
     // on the boot classpath).  Previously this code skipped classes

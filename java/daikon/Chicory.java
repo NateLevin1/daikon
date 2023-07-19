@@ -110,6 +110,10 @@ public class Chicory {
   @Option("Treat classes that match the regex as boot classes (do not instrument)")
   public static @Nullable Pattern boot_classes = null;
 
+  /** Only instrument classes that match the regex */
+  @Option("Only instrument classes that match the regex")
+  public static @Nullable Pattern instrument_only = null;
+
   /**
    * If true, no variable values are printed. Static variables are not initialized yet when the
    * routine is entered, and static variable are not necessarily initialized to their final values
