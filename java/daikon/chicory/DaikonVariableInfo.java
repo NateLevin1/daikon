@@ -17,6 +17,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import org.checkerframework.checker.interning.qual.Interned;
@@ -1029,6 +1030,7 @@ public abstract class DaikonVariableInfo
 
     checkForRuntimeClass(type, theName, offset); // .class var
     checkForClassType(type, theName, offset); // .getType() var
+    checkForMapType(type, theName, offset); // for vars associated w/Map<?, ?>
     checkForString(type, theName, offset); // .tostring var
   }
 
@@ -1116,6 +1118,32 @@ public abstract class DaikonVariableInfo
             isArray);
 
     addChild(classTypeInfo);
+  }
+
+  /**
+   * Checks the given type to see if it is a Map<?, ?> with size() < 100. If so, it adds children
+   * for each key node.
+   */
+  private void checkForMapType(Class<?> type, String theName, String offset) {
+    if (!type.equals(Map.class)) {
+      return;
+    }
+
+    String postString = ""; // either array braces or an empty string
+    if (isArray) {
+      postString = "[]";
+    }
+
+    // add DaikonVariableInfo type
+    DaikonVariableInfo mapInfo =
+        new MapInfo(
+            offset + theName + ".mapInfo",
+            stringClassName + postString,
+            stringClassName + postString,
+            offset + theName,
+            isArray);
+
+    addChild(mapInfo);
   }
 
   /**
