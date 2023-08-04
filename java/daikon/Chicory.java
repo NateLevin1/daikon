@@ -160,6 +160,11 @@ public class Chicory {
   @Option("Print information about each ppt name as it is created")
   public static boolean debug_ppt_names = false;
 
+  @Option(
+      "Output a serialized HashMap that contains the test method(s) each program point was run"
+          + " under")
+  public static boolean output_test_method_map = false;
+
   /** Daikon port number. Daikon writes this to stdout when it is started in online mode. */
   private static int daikon_port = -1;
 

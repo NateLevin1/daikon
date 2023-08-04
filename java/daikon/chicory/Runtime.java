@@ -2,11 +2,13 @@ package daikon.chicory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import daikon.Chicory;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -126,6 +128,8 @@ public class Runtime {
   // ChicoryPremain.initializeDeclAndDTraceWriters.
   )
   static @GuardedBy("Runtime.class") DTraceWriter dtrace_writer;
+
+  private static HashMap<String, ArrayList<String>> testMethodsByPpt;
 
   /**
    * Which static initializers have been run. Each element of the Set is a fully qualified class
@@ -381,6 +385,57 @@ public class Runtime {
       } else {
         dtrace_writer.methodExit(mi, nonce, obj, args, ret_val, exitLineNum);
       }
+
+      if (Chicory.output_test_method_map) {
+        // we provide 0 as the exit line num because it's not important for Takuan (at least right
+        // now)
+        String pptName = DaikonWriter.methodExitName(mi.member, 0);
+        pptName = pptName.substring(0, pptName.length() - 1);
+        if (testMethodsByPpt == null) {
+          testMethodsByPpt = new HashMap<>();
+        }
+        testMethodsByPpt.compute(
+            pptName,
+            (key, value) -> {
+              StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
+
+              String testMethod = null;
+              for (int i = 0; i < stackTraceElements.length; i++) {
+                StackTraceElement stackTraceElement = stackTraceElements[i];
+                if (stackTraceElement
+                    .getClassName()
+                    .equals("org.junit.runners.model.FrameworkMethod$1")) {
+                  StackTraceElement testMethodStackTraceEl = stackTraceElements[i - 5];
+
+                  testMethod =
+                      testMethodStackTraceEl.getClassName()
+                          + "."
+                          + testMethodStackTraceEl.getMethodName()
+                          + ":"
+                          + testMethodStackTraceEl.getLineNumber();
+
+                  if (!testMethodStackTraceEl.getClassName().contains("Test")) {
+                    testMethodStackTraceEl = stackTraceElements[i - 4];
+                  }
+                  if (value == null) {
+                    value = new ArrayList<>();
+                  } else if (value.contains(testMethod)) {
+                    // don't add duplicate test method names
+                    return value;
+                  }
+
+                  break;
+                }
+              }
+
+              if (testMethod != null) {
+                value.add(testMethod);
+              }
+
+              return value;
+            });
+      }
+
       // long duration = System.currentTimeMillis() - start;
       // System.out.println ("Exit " + mi + " " + duration + "ms");
     } finally {
@@ -645,7 +700,10 @@ public class Runtime {
     }
   }
 
-  /** Add a shutdown hook to close the PrintWriter when the program exits. */
+  /**
+   * Add a shutdown hook to close the PrintWriter and serialize the testMethodsByPpt map when the
+   * program exits.
+   */
   private static void addShutdownHook() {
     java.lang.Runtime.getRuntime()
         .addShutdownHook(
@@ -683,6 +741,21 @@ public class Runtime {
                   }
                 } else if (printedRecords == 0) {
                   System.out.println("Chicory warning: no records were printed");
+                }
+
+                if (Chicory.output_test_method_map) {
+                  try {
+                    // .serhm = serialized hashmap
+                    FileOutputStream fos =
+                        new FileOutputStream(
+                            new File(Chicory.output_dir, "TestMethodMap.serhm").toString());
+                    ObjectOutputStream oos = new ObjectOutputStream(fos);
+                    oos.writeObject(testMethodsByPpt);
+                    oos.close();
+                    fos.close();
+                  } catch (IOException e) {
+                    System.out.println("Error writing test method map to file: " + e.getMessage());
+                  }
                 }
               }
             });
