@@ -282,7 +282,7 @@ public final class ONEOFSCALAR extends SINGLESCALAR implements OneOf {
 #if defined(STRINGSEQUENCE)
   public static int dkconfig_size = 2;
 #else
-  public static int dkconfig_size = 3;
+  public static int dkconfig_size = 5;
 #endif
 
 #ifdef BASE_INT
@@ -1521,11 +1521,7 @@ public String format_csharp_contract(@GuardSatisfied ONEOFSCALAR this) {
       return InvariantStatus.FALSIFIED;
     }
 
-#if defined(STRING) || defined(ELTSTRING)
-    if (is_type() && (num_elts == 1)) {
-      return InvariantStatus.FALSIFIED;
-    }
-#elif defined(SEQUENCE)
+#if defined(SEQUENCE)
     if (is_hashcode() && (num_elts == 1)) {
       return InvariantStatus.FALSIFIED;
     }
