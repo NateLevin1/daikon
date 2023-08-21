@@ -12,8 +12,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
@@ -165,6 +167,13 @@ public class Chicory {
           + " under")
   public static boolean output_test_method_map = false;
 
+  @Option(
+      "A file containing problem invariants from Takuan. Used to search for the cleaner, switches"
+          + " Chicory to a cleaner-finder mode.")
+  public static @Nullable File problem_invariants_file;
+
+  public static HashMap<String, String[][]> problemInvariantsVarToPollutedCleanedValue;
+
   /** Daikon port number. Daikon writes this to stdout when it is started in online mode. */
   private static int daikon_port = -1;
 
@@ -185,7 +194,7 @@ public class Chicory {
   private static final String traceLimString = "DTRACELIMIT";
 
   /** flag to use if we want to turn on the static initialization checks */
-  public static final boolean checkStaticInit = true;
+  public static final boolean checkStaticInit = false;
 
   private static final boolean RemoteDebug = false;
 
@@ -286,6 +295,8 @@ public class Chicory {
       dtrace_file = new File(String.format("%s.dtrace.gz", target_class));
       premain_args += " --dtrace-file=" + dtrace_file;
     }
+
+    loadAndParseProblemInvariantsIfNeeded();
 
     // Get the current classpath
     String cp = System.getProperty("java.class.path");
@@ -645,5 +656,48 @@ public class Chicory {
       str += arg + " ";
     }
     return str.trim();
+  }
+
+  public static void loadAndParseProblemInvariantsIfNeeded() {
+    // load and parse file into `problemInvariantsVarToPollutedCleanedValue`
+    if (problem_invariants_file != null) {
+      problemInvariantsVarToPollutedCleanedValue = new HashMap<>();
+      try {
+        List<String> lines = Files.readAllLines(problem_invariants_file.toPath());
+        for (String line : lines) {
+          String[] parts = line.split("!,!");
+          if (parts.length != 3) {
+            continue;
+          }
+          // String ppt = parts[0];
+          String[] pollutedVals = parts[1].split("!\\|!");
+          String[] cleanedVals = parts[2].split("!\\|!");
+          for (String pollutedVal : pollutedVals) {
+            String[] pollutedValSplit = pollutedVal.split("!=!");
+            if (pollutedValSplit.length != 2) {
+              continue;
+            }
+            String var = pollutedValSplit[0];
+            String[] vals = pollutedValSplit[1].split("!&!");
+            problemInvariantsVarToPollutedCleanedValue.put(var, new String[][] {vals, null});
+          }
+          for (String cleanedVal : cleanedVals) {
+            String[] cleanedValSplit = cleanedVal.split("!=!");
+            if (cleanedValSplit.length != 2) {
+              continue;
+            }
+            String var = cleanedValSplit[0];
+            String[] vals = cleanedValSplit[1].split("!&!");
+            String[][] pollutedCleaned = problemInvariantsVarToPollutedCleanedValue.get(var);
+            if (pollutedCleaned != null) {
+              pollutedCleaned[1] = vals;
+            }
+          }
+        }
+        System.out.println("Loaded problem invariants file! Chicory is in problem invariant mode.");
+      } catch (IOException e) {
+        throw new Daikon.UserError("Error reading problem invariants file! " + e);
+      }
+    }
   }
 }

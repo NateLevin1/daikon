@@ -6,6 +6,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -82,7 +84,7 @@ public class DTraceWriter extends DaikonWriter {
     }
     outFile.println(DaikonWriter.methodEntryName(member));
     printNonce(nonceVal);
-    traverse(mi, root, args, obj, nonsenseValue);
+    traverse(mi, root, args, obj, nonsenseValue, true);
 
     outFile.println();
 
@@ -137,7 +139,7 @@ public class DTraceWriter extends DaikonWriter {
 
     outFile.println(DaikonWriter.methodExitName(member, lineNum));
     printNonce(nonceVal);
-    traverse(mi, root, args, obj, ret_val);
+    traverse(mi, root, args, obj, ret_val, false);
 
     outFile.println();
 
@@ -179,7 +181,8 @@ public class DTraceWriter extends DaikonWriter {
       RootInfo root,
       Object[] args,
       Object thisObj,
-      Object ret_val) {
+      Object ret_val,
+      boolean isEnter) {
     // go through all of the node's children
     for (DaikonVariableInfo child : root) {
 
@@ -194,7 +197,6 @@ public class DTraceWriter extends DaikonWriter {
       } else if (child instanceof FieldInfo) {
         // can only occur for static fields
         // non-static fields will appear as children of "this"
-
         val = child.getMyValFromParentVal(null);
       } else if (child instanceof StaticObjInfo) {
         val = null;
@@ -209,25 +211,105 @@ public class DTraceWriter extends DaikonWriter {
                 + mi);
       }
 
-      traverseValue(mi, child, val);
+      traverseValue(mi, child, val, isEnter);
     }
   }
 
+  private static HashMap<String, ArrayList<String[]>> enterValuesAtMethod = new HashMap<>();
+
   // traverse from the traversal pattern data structure and recurse
   private void traverseValue(
-      @GuardSatisfied DTraceWriter this, MethodInfo mi, DaikonVariableInfo curInfo, Object val) {
+      @GuardSatisfied DTraceWriter this,
+      MethodInfo mi,
+      DaikonVariableInfo curInfo,
+      Object val,
+      boolean isEnter) {
 
     if (curInfo.dTraceShouldPrint()) {
+      String name = curInfo.getName();
+      String dtraceValueString = curInfo.getDTraceValueString(val);
       if (!(curInfo instanceof StaticObjInfo)) {
-        outFile.println(curInfo.getName());
-        outFile.println(curInfo.getDTraceValueString(val));
+        outFile.println(name);
+        outFile.println(dtraceValueString);
+      }
+
+      if (Chicory.problem_invariants_file != null) {
+        if (Chicory.problemInvariantsVarToPollutedCleanedValue == null)
+          Chicory.loadAndParseProblemInvariantsIfNeeded();
+
+        if (Chicory.problemInvariantsVarToPollutedCleanedValue.containsKey(name)) {
+          String methodIdentifier =
+              mi.class_info.class_name
+                  + "."
+                  + mi.method_name
+                  + "@"
+                  + Thread.currentThread().getId();
+
+          String valueString =
+              dtraceValueString.substring(
+                  1, dtraceValueString.length() - (DaikonWriter.lineSep.length() + 2));
+
+          if (isEnter) {
+            enterValuesAtMethod.compute(
+                methodIdentifier,
+                (_k, values) -> {
+                  if (values == null) values = new ArrayList<>();
+                  values.add(new String[] {name, valueString, System.identityHashCode(val) + ""});
+                  return values;
+                });
+          } else {
+            ArrayList<String[]> values = enterValuesAtMethod.get(methodIdentifier);
+            assert values != null : "No enter values for method being exited: " + methodIdentifier;
+            for (String[] value : values) {
+              String otherName = value[0];
+              if (otherName.equals(name)) {
+                String entryValue = value[1];
+
+                String[][] pollutedCleanedValues =
+                    Chicory.problemInvariantsVarToPollutedCleanedValue.get(name);
+                String[] pollutedValues = pollutedCleanedValues[0];
+                String[] cleanedValues = pollutedCleanedValues[1];
+
+                String testMethod = getCurrentTestMethod();
+
+                boolean entryWasPolluted = Arrays.asList(pollutedValues).contains(entryValue);
+                boolean exitIsCleaned = Arrays.asList(cleanedValues).contains(valueString);
+
+                if (exitIsCleaned && !entryWasPolluted) {
+                  String entryMemoryLoc = value[2];
+                  String exitMemoryLoc = System.identityHashCode(val) + "";
+                  if (!entryMemoryLoc.equals(exitMemoryLoc)) {
+                    System.out.println(
+                        "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    System.out.println("!!! POSSIBLE RESETER: " + methodIdentifier);
+                    System.out.println("!!! POSSIBLE RESETER TEST: " + testMethod);
+                    System.out.println(
+                        "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                  }
+                }
+
+                // This method is a cleaner IF entryValue is in pollutedValues and
+                // valueString is in cleanedValues
+                if (entryWasPolluted && exitIsCleaned) {
+                  System.out.println(
+                      "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                  System.out.println("!!!  FOUND CLEANER: " + methodIdentifier);
+                  System.out.println("!!!  FOUND CLEANER TEST: " + testMethod);
+                  System.out.println(
+                      "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                }
+              }
+            }
+
+            enterValuesAtMethod.remove(methodIdentifier);
+          }
+        }
       }
 
       if (debug_vars) {
-        String out = curInfo.getDTraceValueString(val);
+        String out = dtraceValueString;
         if (out.length() > 20) out = out.substring(0, 20);
-        System.out.printf(
-            "  --variable %s [%d]= %s%n", curInfo.getName(), curInfo.children.size(), out);
+        System.out.printf("  --variable %s [%d]= %s%n", name, curInfo.children.size(), out);
       }
     }
 
@@ -236,9 +318,32 @@ public class DTraceWriter extends DaikonWriter {
     if (curInfo.dTraceShouldPrintChildren()) {
       for (DaikonVariableInfo child : curInfo) {
         Object childVal = child.getMyValFromParentVal(val);
-        traverseValue(mi, child, childVal);
+        traverseValue(mi, child, childVal, isEnter);
       }
     }
+  }
+
+  private String getCurrentTestMethod() {
+    StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
+    String testMethod = null;
+    for (int i = 0; i < stackTraceElements.length; i++) {
+      StackTraceElement stackTraceElement = stackTraceElements[i];
+      if (stackTraceElement.getClassName().equals("org.junit.runners.model.FrameworkMethod$1")) {
+        StackTraceElement testMethodStackTraceEl = stackTraceElements[i - 5];
+
+        testMethod =
+            testMethodStackTraceEl.getClassName()
+                + "."
+                + testMethodStackTraceEl.getMethodName()
+                + ":"
+                + testMethodStackTraceEl.getLineNumber();
+
+        if (!testMethodStackTraceEl.getClassName().contains("Test")) {
+          testMethodStackTraceEl = stackTraceElements[i - 4];
+        }
+      }
+    }
+    return testMethod;
   }
 
   /**

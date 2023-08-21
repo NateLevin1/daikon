@@ -38,7 +38,7 @@ public class MapInfo extends DaikonVariableInfo {
     String valString;
 
     if (val == null) {
-      valString = "nonsensical" + DaikonWriter.lineSep + "2";
+      valString = "\"null\"" + DaikonWriter.lineSep + "2";
     } else {
       if (val.size() < 100) {
         valString =
