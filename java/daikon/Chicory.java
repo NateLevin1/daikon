@@ -174,6 +174,33 @@ public class Chicory {
 
   public static HashMap<String, String[][]> problemInvariantsVarToPollutedCleanedValue;
 
+  @Option("The JSON file to output the discovered cleaners to.")
+  public static @Nullable File cleaners_output_file;
+
+  public static List<CleanerInfo> cleaners = new ArrayList<>();
+
+  public static class CleanerInfo {
+    String type;
+    String method;
+    @Nullable String testMethod;
+
+    public CleanerInfo(String type, String method, @Nullable String testMethod) {
+      this.type = type;
+      this.method = method;
+      this.testMethod = testMethod;
+    }
+
+    public String toJSON() {
+      return String.format(
+          "{\n"
+              + "\t\t\t\"type\": \"%s\",\n"
+              + "\t\t\t\"method\": \"%s\",\n"
+              + "\t\t\t\"testMethod\": \"%s\"\n"
+              + "\t\t}",
+          type, method, testMethod);
+    }
+  }
+
   /** Daikon port number. Daikon writes this to stdout when it is started in online mode. */
   private static int daikon_port = -1;
 

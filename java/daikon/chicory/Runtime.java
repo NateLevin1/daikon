@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.lock.qual.GuardedBy;
@@ -754,7 +755,29 @@ public class Runtime {
                     oos.close();
                     fos.close();
                   } catch (IOException e) {
-                    System.out.println("Error writing test method map to file: " + e.getMessage());
+                    System.err.println("Error writing test method map to file: " + e.getMessage());
+                  }
+                }
+                if (Chicory.problem_invariants_file != null
+                    && Chicory.cleaners_output_file != null) {
+                  if (Chicory.cleaners.size() == 0) {
+                    throw new RuntimeException("No cleaners were found");
+                  }
+                  try {
+                    Chicory.cleaners_output_file.createNewFile();
+                    PrintWriter outputWriter =
+                        new PrintWriter(Chicory.cleaners_output_file, "utf-8");
+                    outputWriter.println("{");
+                    outputWriter.println("\t\"cleaners\": [");
+                    outputWriter.println(
+                        Chicory.cleaners.stream()
+                            .map(cleaner -> "\t\t" + cleaner.toJSON())
+                            .collect(Collectors.joining(",\n")));
+                    outputWriter.println("\t]");
+                    outputWriter.println("}");
+                    outputWriter.close();
+                  } catch (IOException e) {
+                    System.err.println("Error writing test method map to file: " + e.getMessage());
                   }
                 }
               }

@@ -279,24 +279,18 @@ public class DTraceWriter extends DaikonWriter {
                   String entryMemoryLoc = value[2];
                   String exitMemoryLoc = System.identityHashCode(val) + "";
                   if (!entryMemoryLoc.equals(exitMemoryLoc)) {
-                    System.out.println(
-                        "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    System.out.println("!!! POSSIBLE RESETER: " + methodIdentifier);
-                    System.out.println("!!! POSSIBLE RESETER TEST: " + testMethod);
-                    System.out.println(
-                        "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    Chicory.cleaners.add(
+                        new Chicory.CleanerInfo(
+                            "reset", mi.class_info.class_name + "." + mi.method_name, testMethod));
                   }
                 }
 
                 // This method is a cleaner IF entryValue is in pollutedValues and
                 // valueString is in cleanedValues
                 if (entryWasPolluted && exitIsCleaned) {
-                  System.out.println(
-                      "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                  System.out.println("!!!  FOUND CLEANER: " + methodIdentifier);
-                  System.out.println("!!!  FOUND CLEANER TEST: " + testMethod);
-                  System.out.println(
-                      "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                  Chicory.cleaners.add(
+                      new Chicory.CleanerInfo(
+                          "clean", mi.class_info.class_name + "." + mi.method_name, testMethod));
                 }
               }
             }
@@ -332,11 +326,7 @@ public class DTraceWriter extends DaikonWriter {
         StackTraceElement testMethodStackTraceEl = stackTraceElements[i - 5];
 
         testMethod =
-            testMethodStackTraceEl.getClassName()
-                + "."
-                + testMethodStackTraceEl.getMethodName()
-                + ":"
-                + testMethodStackTraceEl.getLineNumber();
+            testMethodStackTraceEl.getClassName() + "." + testMethodStackTraceEl.getMethodName();
 
         if (!testMethodStackTraceEl.getClassName().contains("Test")) {
           testMethodStackTraceEl = stackTraceElements[i - 4];
