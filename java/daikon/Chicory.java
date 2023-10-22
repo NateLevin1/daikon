@@ -201,6 +201,9 @@ public class Chicory {
     }
   }
 
+  @Option("Disable the out of date classfile warning message.")
+  public static boolean disable_classfile_version_mismatch_warning = false;
+
   /** Daikon port number. Daikon writes this to stdout when it is started in online mode. */
   private static int daikon_port = -1;
 

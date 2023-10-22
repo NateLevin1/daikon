@@ -402,7 +402,7 @@ public class Instrument extends InstructionListUtils implements ClassFileTransfo
     ClassInfo class_info = new ClassInfo(cg.getClassName(), loader);
     List<MethodInfo> method_infos = new ArrayList<>();
 
-    if (cg.getMajor() < Const.MAJOR_1_6) {
+    if (cg.getMajor() < Const.MAJOR_1_6 && !Chicory.disable_classfile_version_mismatch_warning) {
       System.out.printf(
           "Chicory warning: ClassFile: %s - classfile version (%d) is out of date and may not be"
               + " processed correctly.%n",
