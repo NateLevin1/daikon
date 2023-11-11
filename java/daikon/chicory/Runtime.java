@@ -761,7 +761,8 @@ public class Runtime {
                 if (Chicory.problem_invariants_file != null
                     && Chicory.cleaners_output_file != null) {
                   if (Chicory.cleaners.size() == 0) {
-                    throw new RuntimeException("No cleaners were found");
+                    System.err.println("No cleaners were found");
+                    System.exit(1);
                   }
                   try {
                     Chicory.cleaners_output_file.createNewFile();
