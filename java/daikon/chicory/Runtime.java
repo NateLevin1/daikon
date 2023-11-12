@@ -762,7 +762,7 @@ public class Runtime {
                     && Chicory.cleaners_output_file != null) {
                   if (Chicory.cleaners.size() == 0) {
                     System.err.println("No cleaners were found");
-                    System.exit(1);
+                    java.lang.Runtime.getRuntime().halt(1);
                   }
                   try {
                     Chicory.cleaners_output_file.createNewFile();
