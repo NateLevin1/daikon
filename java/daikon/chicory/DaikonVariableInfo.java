@@ -5,7 +5,6 @@ import daikon.Daikon.BugInDaikon;
 import daikon.plumelib.bcelutil.SimpleLog;
 import daikon.plumelib.reflection.ReflectionPlume;
 import daikon.plumelib.reflection.Signatures;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -412,35 +411,37 @@ public abstract class DaikonVariableInfo
    * @param depth the remaining depth to print variables to
    */
   protected void addParameters(ClassInfo cinfo, Member method, List<String> argnames, int depth) {
-    debug_vars.log("enter addParameters%n");
+    return;
 
-    Class<?>[] parameterTypes =
-        (method instanceof Constructor<?>)
-            ? ((Constructor<?>) method).getParameterTypes()
-            : ((Method) method).getParameterTypes();
-    assert argnames.size() == parameterTypes.length;
+    // debug_vars.log("enter addParameters%n");
 
-    int param_offset = 0;
-    for (int i = 0; i < parameterTypes.length; i++) {
-      Class<?> type = parameterTypes[i];
-      String name = argnames.get(i);
-      if (type.getName().equals("daikon.dcomp.DCompMarker")
-          || type.getName().equals("java.lang.DCompMarker")) {
-        continue;
-      }
-      debug_vars.log("processing parameter '%s'%n", name);
-      debug_vars.indent();
-      DaikonVariableInfo theChild =
-          addParamDeclVar(cinfo, type, name, /* offset= */ "", depth, i, param_offset);
-      param_offset++;
-      if ((type == Double.TYPE) || (type == Long.TYPE)) {
-        param_offset++;
-      }
-      assert cinfo.clazz != null : "@AssumeAssertion(nullness): need to check justification";
-      theChild.addChildNodes(cinfo, type, name, /* offset= */ "", depth);
-      debug_vars.exdent();
-    }
-    debug_vars.log("exit addParameters%n");
+    // Class<?>[] parameterTypes =
+    //     (method instanceof Constructor<?>)
+    //         ? ((Constructor<?>) method).getParameterTypes()
+    //         : ((Method) method).getParameterTypes();
+    // assert argnames.size() == parameterTypes.length;
+
+    // int param_offset = 0;
+    // for (int i = 0; i < parameterTypes.length; i++) {
+    //   Class<?> type = parameterTypes[i];
+    //   String name = argnames.get(i);
+    //   if (type.getName().equals("daikon.dcomp.DCompMarker")
+    //       || type.getName().equals("java.lang.DCompMarker")) {
+    //     continue;
+    //   }
+    //   debug_vars.log("processing parameter '%s'%n", name);
+    //   debug_vars.indent();
+    //   DaikonVariableInfo theChild =
+    //       addParamDeclVar(cinfo, type, name, /* offset= */ "", depth, i, param_offset);
+    //   param_offset++;
+    //   if ((type == Double.TYPE) || (type == Long.TYPE)) {
+    //     param_offset++;
+    //   }
+    //   assert cinfo.clazz != null : "@AssumeAssertion(nullness): need to check justification";
+    //   theChild.addChildNodes(cinfo, type, name, /* offset= */ "", depth);
+    //   debug_vars.exdent();
+    // }
+    // debug_vars.log("exit addParameters%n");
   }
 
   /**
