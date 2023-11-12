@@ -15,69 +15,21 @@ import daikon.inv.OutputFormat;
 import daikon.inv.binary.sequenceScalar.Member;
 import daikon.inv.binary.sequenceScalar.MemberFloat;
 import daikon.inv.binary.sequenceScalar.SeqFloatEqual;
-import daikon.inv.binary.sequenceScalar.SeqFloatGreaterEqual;
-import daikon.inv.binary.sequenceScalar.SeqFloatGreaterThan;
-import daikon.inv.binary.sequenceScalar.SeqFloatLessEqual;
-import daikon.inv.binary.sequenceScalar.SeqFloatLessThan;
 import daikon.inv.binary.sequenceScalar.SeqIntEqual;
-import daikon.inv.binary.sequenceScalar.SeqIntGreaterEqual;
-import daikon.inv.binary.sequenceScalar.SeqIntGreaterThan;
-import daikon.inv.binary.sequenceScalar.SeqIntLessEqual;
-import daikon.inv.binary.sequenceScalar.SeqIntLessThan;
 import daikon.inv.binary.sequenceString.MemberString;
 import daikon.inv.binary.twoScalar.FloatEqual;
-import daikon.inv.binary.twoScalar.FloatGreaterEqual;
-import daikon.inv.binary.twoScalar.FloatGreaterThan;
-import daikon.inv.binary.twoScalar.FloatLessEqual;
-import daikon.inv.binary.twoScalar.FloatLessThan;
-import daikon.inv.binary.twoScalar.FloatNonEqual;
 import daikon.inv.binary.twoScalar.IntEqual;
-import daikon.inv.binary.twoScalar.IntGreaterEqual;
-import daikon.inv.binary.twoScalar.IntGreaterThan;
-import daikon.inv.binary.twoScalar.IntLessEqual;
-import daikon.inv.binary.twoScalar.IntLessThan;
-import daikon.inv.binary.twoScalar.IntNonEqual;
-import daikon.inv.binary.twoScalar.LinearBinary;
-import daikon.inv.binary.twoScalar.LinearBinaryFloat;
 import daikon.inv.binary.twoScalar.NumericFloat;
 import daikon.inv.binary.twoScalar.NumericInt;
 import daikon.inv.binary.twoSequence.PairwiseFloatEqual;
-import daikon.inv.binary.twoSequence.PairwiseFloatGreaterEqual;
-import daikon.inv.binary.twoSequence.PairwiseFloatGreaterThan;
-import daikon.inv.binary.twoSequence.PairwiseFloatLessEqual;
-import daikon.inv.binary.twoSequence.PairwiseFloatLessThan;
 import daikon.inv.binary.twoSequence.PairwiseIntEqual;
-import daikon.inv.binary.twoSequence.PairwiseIntGreaterEqual;
-import daikon.inv.binary.twoSequence.PairwiseIntGreaterThan;
-import daikon.inv.binary.twoSequence.PairwiseIntLessEqual;
-import daikon.inv.binary.twoSequence.PairwiseIntLessThan;
-import daikon.inv.binary.twoSequence.PairwiseLinearBinary;
-import daikon.inv.binary.twoSequence.PairwiseLinearBinaryFloat;
 import daikon.inv.binary.twoSequence.PairwiseNumericFloat;
 import daikon.inv.binary.twoSequence.PairwiseNumericInt;
 import daikon.inv.binary.twoSequence.PairwiseString;
 import daikon.inv.binary.twoSequence.PairwiseStringEqual;
-import daikon.inv.binary.twoSequence.PairwiseStringGreaterEqual;
-import daikon.inv.binary.twoSequence.PairwiseStringGreaterThan;
-import daikon.inv.binary.twoSequence.PairwiseStringLessEqual;
-import daikon.inv.binary.twoSequence.PairwiseStringLessThan;
-import daikon.inv.binary.twoSequence.Reverse;
-import daikon.inv.binary.twoSequence.ReverseFloat;
 import daikon.inv.binary.twoSequence.SeqSeqFloatEqual;
-import daikon.inv.binary.twoSequence.SeqSeqFloatGreaterEqual;
-import daikon.inv.binary.twoSequence.SeqSeqFloatGreaterThan;
-import daikon.inv.binary.twoSequence.SeqSeqFloatLessEqual;
-import daikon.inv.binary.twoSequence.SeqSeqFloatLessThan;
 import daikon.inv.binary.twoSequence.SeqSeqIntEqual;
-import daikon.inv.binary.twoSequence.SeqSeqIntGreaterEqual;
-import daikon.inv.binary.twoSequence.SeqSeqIntGreaterThan;
-import daikon.inv.binary.twoSequence.SeqSeqIntLessEqual;
-import daikon.inv.binary.twoSequence.SeqSeqIntLessThan;
 import daikon.inv.binary.twoSequence.SeqSeqStringEqual;
-import daikon.inv.binary.twoSequence.SeqSeqStringGreaterEqual;
-import daikon.inv.binary.twoSequence.SeqSeqStringGreaterThan;
-import daikon.inv.binary.twoSequence.SeqSeqStringLessEqual;
-import daikon.inv.binary.twoSequence.SeqSeqStringLessThan;
 import daikon.inv.binary.twoSequence.SubSequence;
 import daikon.inv.binary.twoSequence.SubSequenceFloat;
 import daikon.inv.binary.twoSequence.SubSet;
@@ -88,71 +40,25 @@ import daikon.inv.binary.twoSequence.SuperSet;
 import daikon.inv.binary.twoSequence.SuperSetFloat;
 import daikon.inv.binary.twoString.StdString;
 import daikon.inv.binary.twoString.StringEqual;
-import daikon.inv.binary.twoString.StringGreaterEqual;
-import daikon.inv.binary.twoString.StringGreaterThan;
-import daikon.inv.binary.twoString.StringLessEqual;
-import daikon.inv.binary.twoString.StringLessThan;
-import daikon.inv.binary.twoString.StringNonEqual;
-import daikon.inv.ternary.threeScalar.FunctionBinary;
-import daikon.inv.ternary.threeScalar.FunctionBinaryFloat;
-import daikon.inv.ternary.threeScalar.LinearTernary;
-import daikon.inv.ternary.threeScalar.LinearTernaryFloat;
 import daikon.inv.unary.scalar.CompleteOneOfScalar;
-import daikon.inv.unary.scalar.IsPointer;
-import daikon.inv.unary.scalar.LowerBound;
-import daikon.inv.unary.scalar.LowerBoundFloat;
-import daikon.inv.unary.scalar.Modulus;
-import daikon.inv.unary.scalar.NonModulus;
-import daikon.inv.unary.scalar.NonZero;
-import daikon.inv.unary.scalar.NonZeroFloat;
 import daikon.inv.unary.scalar.OneOfFloat;
 import daikon.inv.unary.scalar.OneOfScalar;
 import daikon.inv.unary.scalar.RangeFloat;
 import daikon.inv.unary.scalar.RangeInt;
-import daikon.inv.unary.scalar.UpperBound;
-import daikon.inv.unary.scalar.UpperBoundFloat;
-import daikon.inv.unary.sequence.CommonFloatSequence;
-import daikon.inv.unary.sequence.CommonSequence;
-import daikon.inv.unary.sequence.EltLowerBound;
-import daikon.inv.unary.sequence.EltLowerBoundFloat;
 import daikon.inv.unary.sequence.EltNonZero;
 import daikon.inv.unary.sequence.EltNonZeroFloat;
 import daikon.inv.unary.sequence.EltOneOf;
 import daikon.inv.unary.sequence.EltOneOfFloat;
 import daikon.inv.unary.sequence.EltRangeFloat;
 import daikon.inv.unary.sequence.EltRangeInt;
-import daikon.inv.unary.sequence.EltUpperBound;
-import daikon.inv.unary.sequence.EltUpperBoundFloat;
 import daikon.inv.unary.sequence.EltwiseFloatEqual;
-import daikon.inv.unary.sequence.EltwiseFloatGreaterEqual;
-import daikon.inv.unary.sequence.EltwiseFloatGreaterThan;
-import daikon.inv.unary.sequence.EltwiseFloatLessEqual;
-import daikon.inv.unary.sequence.EltwiseFloatLessThan;
 import daikon.inv.unary.sequence.EltwiseIntEqual;
-import daikon.inv.unary.sequence.EltwiseIntGreaterEqual;
-import daikon.inv.unary.sequence.EltwiseIntGreaterThan;
-import daikon.inv.unary.sequence.EltwiseIntLessEqual;
-import daikon.inv.unary.sequence.EltwiseIntLessThan;
-import daikon.inv.unary.sequence.NoDuplicates;
-import daikon.inv.unary.sequence.NoDuplicatesFloat;
 import daikon.inv.unary.sequence.OneOfFloatSequence;
 import daikon.inv.unary.sequence.OneOfSequence;
 import daikon.inv.unary.sequence.SeqIndexFloatEqual;
-import daikon.inv.unary.sequence.SeqIndexFloatGreaterEqual;
-import daikon.inv.unary.sequence.SeqIndexFloatGreaterThan;
-import daikon.inv.unary.sequence.SeqIndexFloatLessEqual;
-import daikon.inv.unary.sequence.SeqIndexFloatLessThan;
-import daikon.inv.unary.sequence.SeqIndexFloatNonEqual;
 import daikon.inv.unary.sequence.SeqIndexIntEqual;
-import daikon.inv.unary.sequence.SeqIndexIntGreaterEqual;
-import daikon.inv.unary.sequence.SeqIndexIntGreaterThan;
-import daikon.inv.unary.sequence.SeqIndexIntLessEqual;
-import daikon.inv.unary.sequence.SeqIndexIntLessThan;
-import daikon.inv.unary.sequence.SeqIndexIntNonEqual;
 import daikon.inv.unary.string.CompleteOneOfString;
 import daikon.inv.unary.string.OneOfString;
-import daikon.inv.unary.string.PrintableString;
-import daikon.inv.unary.stringsequence.CommonStringSequence;
 import daikon.inv.unary.stringsequence.EltOneOfString;
 import daikon.inv.unary.stringsequence.OneOfStringSequence;
 import daikon.simplify.LemmaStack;
@@ -1512,27 +1418,27 @@ public final class Daikon {
       proto_invs.add(OneOfString.get_proto());
 
       // NonZero (NonZero.java.jpp)
-      proto_invs.add(NonZero.get_proto());
-      proto_invs.add(NonZeroFloat.get_proto());
+      // proto_invs.add(NonZero.get_proto());
+      // proto_invs.add(NonZeroFloat.get_proto());
 
-      proto_invs.add(IsPointer.get_proto());
+      // proto_invs.add(IsPointer.get_proto());
 
       // Lower and Upper bound (Bound.java.jpp)
-      proto_invs.add(LowerBound.get_proto());
-      proto_invs.add(LowerBoundFloat.get_proto());
-      proto_invs.add(UpperBound.get_proto());
-      proto_invs.add(UpperBoundFloat.get_proto());
+      // proto_invs.add(LowerBound.get_proto());
+      // proto_invs.add(LowerBoundFloat.get_proto());
+      // proto_invs.add(UpperBound.get_proto());
+      // proto_invs.add(UpperBoundFloat.get_proto());
 
       // Modulus and NonModulus (Modulus.java and NonModulus.java)
-      proto_invs.add(Modulus.get_proto());
-      proto_invs.add(NonModulus.get_proto());
+      // proto_invs.add(Modulus.get_proto());
+      // proto_invs.add(NonModulus.get_proto());
 
       // Range invariant (Range.java.jpp)
       proto_invs.addAll(RangeInt.get_proto_all());
       proto_invs.addAll(RangeFloat.get_proto_all());
 
       // Printable String
-      proto_invs.add(PrintableString.get_proto());
+      // proto_invs.add(PrintableString.get_proto());
 
       // Complete One Of
       proto_invs.add(CompleteOneOfString.get_proto());
@@ -1559,77 +1465,77 @@ public final class Daikon {
 
       // Sequence Index Comparisons (SeqIndexComparison.java.jpp)
       proto_invs.add(SeqIndexIntEqual.get_proto());
-      proto_invs.add(SeqIndexIntNonEqual.get_proto());
-      proto_invs.add(SeqIndexIntGreaterEqual.get_proto());
-      proto_invs.add(SeqIndexIntGreaterThan.get_proto());
-      proto_invs.add(SeqIndexIntLessEqual.get_proto());
-      proto_invs.add(SeqIndexIntLessThan.get_proto());
+      // proto_invs.add(SeqIndexIntNonEqual.get_proto());
+      // proto_invs.add(SeqIndexIntGreaterEqual.get_proto());
+      // proto_invs.add(SeqIndexIntGreaterThan.get_proto());
+      // proto_invs.add(SeqIndexIntLessEqual.get_proto());
+      // proto_invs.add(SeqIndexIntLessThan.get_proto());
       proto_invs.add(SeqIndexFloatEqual.get_proto());
-      proto_invs.add(SeqIndexFloatNonEqual.get_proto());
-      proto_invs.add(SeqIndexFloatGreaterEqual.get_proto());
-      proto_invs.add(SeqIndexFloatGreaterThan.get_proto());
-      proto_invs.add(SeqIndexFloatLessEqual.get_proto());
-      proto_invs.add(SeqIndexFloatLessThan.get_proto());
+      // proto_invs.add(SeqIndexFloatNonEqual.get_proto());
+      // proto_invs.add(SeqIndexFloatGreaterEqual.get_proto());
+      // proto_invs.add(SeqIndexFloatGreaterThan.get_proto());
+      // proto_invs.add(SeqIndexFloatLessEqual.get_proto());
+      // proto_invs.add(SeqIndexFloatLessThan.get_proto());
 
       // foreach i compare a[i] to a[i+1] (EltwiseIntComparisons.java.jpp)
       proto_invs.add(EltwiseIntEqual.get_proto());
-      proto_invs.add(EltwiseIntLessEqual.get_proto());
-      proto_invs.add(EltwiseIntGreaterEqual.get_proto());
-      proto_invs.add(EltwiseIntLessThan.get_proto());
-      proto_invs.add(EltwiseIntGreaterThan.get_proto());
+      // proto_invs.add(EltwiseIntLessEqual.get_proto());
+      // proto_invs.add(EltwiseIntGreaterEqual.get_proto());
+      // proto_invs.add(EltwiseIntLessThan.get_proto());
+      // proto_invs.add(EltwiseIntGreaterThan.get_proto());
       proto_invs.add(EltwiseFloatEqual.get_proto());
-      proto_invs.add(EltwiseFloatLessEqual.get_proto());
-      proto_invs.add(EltwiseFloatGreaterEqual.get_proto());
-      proto_invs.add(EltwiseFloatLessThan.get_proto());
-      proto_invs.add(EltwiseFloatGreaterThan.get_proto());
+      // proto_invs.add(EltwiseFloatLessEqual.get_proto());
+      // proto_invs.add(EltwiseFloatGreaterEqual.get_proto());
+      // proto_invs.add(EltwiseFloatLessThan.get_proto());
+      // proto_invs.add(EltwiseFloatGreaterThan.get_proto());
 
       // EltNonZero (EltNonZero.java.jpp)
       proto_invs.add(EltNonZero.get_proto());
       proto_invs.add(EltNonZeroFloat.get_proto());
 
       // No Duplicates (NoDuplicates.java.jpp)
-      proto_invs.add(NoDuplicates.get_proto());
-      proto_invs.add(NoDuplicatesFloat.get_proto());
+      // proto_invs.add(NoDuplicates.get_proto());
+      // proto_invs.add(NoDuplicatesFloat.get_proto());
 
       // Element bounds (Bound.java.jpp)
-      proto_invs.add(EltLowerBound.get_proto());
-      proto_invs.add(EltUpperBound.get_proto());
-      proto_invs.add(EltLowerBoundFloat.get_proto());
-      proto_invs.add(EltUpperBoundFloat.get_proto());
+      // proto_invs.add(EltLowerBound.get_proto());
+      // proto_invs.add(EltUpperBound.get_proto());
+      // proto_invs.add(EltLowerBoundFloat.get_proto());
+      // proto_invs.add(EltUpperBoundFloat.get_proto());
 
       // CommonSequence (CommonSequence.java.jpp)
-      proto_invs.add(CommonSequence.get_proto());
-      proto_invs.add(CommonFloatSequence.get_proto());
+      // proto_invs.add(CommonSequence.get_proto());
+      // proto_invs.add(CommonFloatSequence.get_proto());
 
       // CommonStringSequence (CommonStringSubsequence.java)
-      proto_invs.add(CommonStringSequence.get_proto());
+      // proto_invs.add(CommonStringSequence.get_proto());
     }
 
     // Binary scalar-scalar invariants
     {
       // Int, Float, String comparisons (from IntComparisons.java.jpp)
       proto_invs.add(IntEqual.get_proto());
-      proto_invs.add(IntNonEqual.get_proto());
-      proto_invs.add(IntLessThan.get_proto());
-      proto_invs.add(IntGreaterThan.get_proto());
-      proto_invs.add(IntLessEqual.get_proto());
-      proto_invs.add(IntGreaterEqual.get_proto());
+      // proto_invs.add(IntNonEqual.get_proto());
+      // proto_invs.add(IntLessThan.get_proto());
+      // proto_invs.add(IntGreaterThan.get_proto());
+      // proto_invs.add(IntLessEqual.get_proto());
+      // proto_invs.add(IntGreaterEqual.get_proto());
       proto_invs.add(FloatEqual.get_proto());
-      proto_invs.add(FloatNonEqual.get_proto());
-      proto_invs.add(FloatLessThan.get_proto());
-      proto_invs.add(FloatGreaterThan.get_proto());
-      proto_invs.add(FloatLessEqual.get_proto());
-      proto_invs.add(FloatGreaterEqual.get_proto());
+      // proto_invs.add(FloatNonEqual.get_proto());
+      // proto_invs.add(FloatLessThan.get_proto());
+      // proto_invs.add(FloatGreaterThan.get_proto());
+      // proto_invs.add(FloatLessEqual.get_proto());
+      // proto_invs.add(FloatGreaterEqual.get_proto());
       proto_invs.add(StringEqual.get_proto());
-      proto_invs.add(StringNonEqual.get_proto());
-      proto_invs.add(StringLessThan.get_proto());
-      proto_invs.add(StringGreaterThan.get_proto());
-      proto_invs.add(StringLessEqual.get_proto());
-      proto_invs.add(StringGreaterEqual.get_proto());
+      // proto_invs.add(StringNonEqual.get_proto());
+      // proto_invs.add(StringLessThan.get_proto());
+      // proto_invs.add(StringGreaterThan.get_proto());
+      // proto_invs.add(StringLessEqual.get_proto());
+      // proto_invs.add(StringGreaterEqual.get_proto());
 
       // LinearBinary over integer/float (from LinearBinary.java.jpp)
-      proto_invs.add(LinearBinary.get_proto());
-      proto_invs.add(LinearBinaryFloat.get_proto());
+      // proto_invs.add(LinearBinary.get_proto());
+      // proto_invs.add(LinearBinaryFloat.get_proto());
 
       // Numeric invariants (from Numeric.java.jpp)
       proto_invs.addAll(NumericInt.get_proto_all());
@@ -1650,45 +1556,45 @@ public final class Daikon {
 
       // Lexical sequence comparisons (from SeqComparison.java.jpp)
       proto_invs.add(SeqSeqIntEqual.get_proto());
-      proto_invs.add(SeqSeqIntLessThan.get_proto());
-      proto_invs.add(SeqSeqIntGreaterThan.get_proto());
-      proto_invs.add(SeqSeqIntLessEqual.get_proto());
-      proto_invs.add(SeqSeqIntGreaterEqual.get_proto());
+      // proto_invs.add(SeqSeqIntLessThan.get_proto());
+      // proto_invs.add(SeqSeqIntGreaterThan.get_proto());
+      // proto_invs.add(SeqSeqIntLessEqual.get_proto());
+      // proto_invs.add(SeqSeqIntGreaterEqual.get_proto());
       proto_invs.add(SeqSeqFloatEqual.get_proto());
-      proto_invs.add(SeqSeqFloatLessThan.get_proto());
-      proto_invs.add(SeqSeqFloatGreaterThan.get_proto());
-      proto_invs.add(SeqSeqFloatLessEqual.get_proto());
-      proto_invs.add(SeqSeqFloatGreaterEqual.get_proto());
+      // proto_invs.add(SeqSeqFloatLessThan.get_proto());
+      // proto_invs.add(SeqSeqFloatGreaterThan.get_proto());
+      // proto_invs.add(SeqSeqFloatLessEqual.get_proto());
+      // proto_invs.add(SeqSeqFloatGreaterEqual.get_proto());
       proto_invs.add(SeqSeqStringEqual.get_proto());
-      proto_invs.add(SeqSeqStringLessThan.get_proto());
-      proto_invs.add(SeqSeqStringGreaterThan.get_proto());
-      proto_invs.add(SeqSeqStringLessEqual.get_proto());
-      proto_invs.add(SeqSeqStringGreaterEqual.get_proto());
+      // proto_invs.add(SeqSeqStringLessThan.get_proto());
+      // proto_invs.add(SeqSeqStringGreaterThan.get_proto());
+      // proto_invs.add(SeqSeqStringLessEqual.get_proto());
+      // proto_invs.add(SeqSeqStringGreaterEqual.get_proto());
 
       // Pairwise sequence comparisons (from PairwiseIntComparison.java.jpp)
       proto_invs.add(PairwiseIntEqual.get_proto());
-      proto_invs.add(PairwiseIntLessThan.get_proto());
-      proto_invs.add(PairwiseIntGreaterThan.get_proto());
-      proto_invs.add(PairwiseIntLessEqual.get_proto());
-      proto_invs.add(PairwiseIntGreaterEqual.get_proto());
+      // proto_invs.add(PairwiseIntLessThan.get_proto());
+      // proto_invs.add(PairwiseIntGreaterThan.get_proto());
+      // proto_invs.add(PairwiseIntLessEqual.get_proto());
+      // proto_invs.add(PairwiseIntGreaterEqual.get_proto());
       proto_invs.add(PairwiseFloatEqual.get_proto());
-      proto_invs.add(PairwiseFloatLessThan.get_proto());
-      proto_invs.add(PairwiseFloatGreaterThan.get_proto());
-      proto_invs.add(PairwiseFloatLessEqual.get_proto());
-      proto_invs.add(PairwiseFloatGreaterEqual.get_proto());
+      // proto_invs.add(PairwiseFloatLessThan.get_proto());
+      // proto_invs.add(PairwiseFloatGreaterThan.get_proto());
+      // proto_invs.add(PairwiseFloatLessEqual.get_proto());
+      // proto_invs.add(PairwiseFloatGreaterEqual.get_proto());
       proto_invs.add(PairwiseStringEqual.get_proto());
-      proto_invs.add(PairwiseStringLessThan.get_proto());
-      proto_invs.add(PairwiseStringGreaterThan.get_proto());
-      proto_invs.add(PairwiseStringLessEqual.get_proto());
-      proto_invs.add(PairwiseStringGreaterEqual.get_proto());
+      // proto_invs.add(PairwiseStringLessThan.get_proto());
+      // proto_invs.add(PairwiseStringGreaterThan.get_proto());
+      // proto_invs.add(PairwiseStringLessEqual.get_proto());
+      // proto_invs.add(PairwiseStringGreaterEqual.get_proto());
 
       // Array Reverse (from Reverse.java.jpp)
-      proto_invs.add(Reverse.get_proto());
-      proto_invs.add(ReverseFloat.get_proto());
+      // proto_invs.add(Reverse.get_proto());
+      // proto_invs.add(ReverseFloat.get_proto());
 
       // Pairwise Linear Binary (from PairwiseLinearBinary.java.jpp)
-      proto_invs.add(PairwiseLinearBinary.get_proto());
-      proto_invs.add(PairwiseLinearBinaryFloat.get_proto());
+      // proto_invs.add(PairwiseLinearBinary.get_proto());
+      // proto_invs.add(PairwiseLinearBinaryFloat.get_proto());
 
       // Subset and Superset (from SubSet.java.jpp)
       proto_invs.add(SubSet.get_proto());
@@ -1707,15 +1613,15 @@ public final class Daikon {
     {
       // Comparison of scalar to each array element (SeqIntComparison.java.jpp)
       proto_invs.add(SeqIntEqual.get_proto());
-      proto_invs.add(SeqIntLessThan.get_proto());
-      proto_invs.add(SeqIntGreaterThan.get_proto());
-      proto_invs.add(SeqIntLessEqual.get_proto());
-      proto_invs.add(SeqIntGreaterEqual.get_proto());
+      // proto_invs.add(SeqIntLessThan.get_proto());
+      // proto_invs.add(SeqIntGreaterThan.get_proto());
+      // proto_invs.add(SeqIntLessEqual.get_proto());
+      // proto_invs.add(SeqIntGreaterEqual.get_proto());
       proto_invs.add(SeqFloatEqual.get_proto());
-      proto_invs.add(SeqFloatLessThan.get_proto());
-      proto_invs.add(SeqFloatGreaterThan.get_proto());
-      proto_invs.add(SeqFloatLessEqual.get_proto());
-      proto_invs.add(SeqFloatGreaterEqual.get_proto());
+      // proto_invs.add(SeqFloatLessThan.get_proto());
+      // proto_invs.add(SeqFloatGreaterThan.get_proto());
+      // proto_invs.add(SeqFloatLessEqual.get_proto());
+      // proto_invs.add(SeqFloatGreaterEqual.get_proto());
 
       // Scalar is an element of the array (Member.java.jpp)
       proto_invs.add(Member.get_proto());
@@ -1726,12 +1632,12 @@ public final class Daikon {
     // Ternary invariants
     {
       // FunctionBinary (FunctionBinary.java.jpp)
-      proto_invs.addAll(FunctionBinary.get_proto_all());
-      proto_invs.addAll(FunctionBinaryFloat.get_proto_all());
+      // proto_invs.addAll(FunctionBinary.get_proto_all());
+      // proto_invs.addAll(FunctionBinaryFloat.get_proto_all());
 
       // LinearTernary (LinearTernary.java.jpp)
-      proto_invs.add(LinearTernary.get_proto());
-      proto_invs.add(LinearTernaryFloat.get_proto());
+      // proto_invs.add(LinearTernary.get_proto());
+      // proto_invs.add(LinearTernaryFloat.get_proto());
     }
 
     // User-defined invariants
