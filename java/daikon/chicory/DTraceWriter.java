@@ -234,9 +234,6 @@ public class DTraceWriter extends DaikonWriter {
       }
 
       if (Chicory.problem_invariants_file != null) {
-        if (Chicory.problemInvariantsVarToPollutedCleanedValue == null)
-          Chicory.loadAndParseProblemInvariantsIfNeeded();
-
         if (Chicory.problemInvariantsVarToPollutedCleanedValue.containsKey(name)) {
           String methodIdentifier =
               mi.class_info.class_name

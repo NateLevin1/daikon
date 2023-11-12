@@ -173,6 +173,7 @@ public class Chicory {
   public static @Nullable File problem_invariants_file;
 
   public static HashMap<String, String[][]> problemInvariantsVarToPollutedCleanedValue;
+  public static ArrayList<String> problemInvariantClasses;
 
   @Option("The JSON file to output the discovered cleaners to.")
   public static @Nullable File cleaners_output_file;
@@ -690,8 +691,9 @@ public class Chicory {
 
   public static void loadAndParseProblemInvariantsIfNeeded() {
     // load and parse file into `problemInvariantsVarToPollutedCleanedValue`
-    if (problem_invariants_file != null) {
+    if (problem_invariants_file != null && problemInvariantsVarToPollutedCleanedValue == null) {
       problemInvariantsVarToPollutedCleanedValue = new HashMap<>();
+      problemInvariantClasses = new ArrayList<>();
       try {
         List<String> lines = Files.readAllLines(problem_invariants_file.toPath());
         for (String line : lines) {
@@ -699,7 +701,20 @@ public class Chicory {
           if (parts.length != 3) {
             continue;
           }
-          // String ppt = parts[0];
+          String ppt = parts[0];
+          // ppt is of the form package.Class.method():::EXIT or package.Class:::OBJECT
+          // we need to extract just the class from that, and add it to the list of classes to
+          // instrument
+          String pptClass = ppt.substring(0, ppt.lastIndexOf(":::"));
+          if (ppt.contains("(")) {
+            // first, remove up to the method call
+            pptClass = pptClass.substring(0, pptClass.lastIndexOf("("));
+            // then remove the method name
+            pptClass = pptClass.substring(0, pptClass.lastIndexOf("."));
+          }
+
+          problemInvariantClasses.add(pptClass);
+
           String[] pollutedVals = parts[1].split("!\\|!");
           String[] cleanedVals = parts[2].split("!\\|!");
           for (String pollutedVal : pollutedVals) {

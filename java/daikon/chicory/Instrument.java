@@ -156,6 +156,13 @@ public class Instrument extends InstructionListUtils implements ClassFileTransfo
       }
     }
 
+    Chicory.loadAndParseProblemInvariantsIfNeeded();
+    if (Chicory.problemInvariantClasses != null
+        && !Chicory.problemInvariantClasses.contains(fullClassName)) {
+      debug_transform.log("ignoring class %s, not in problemInvariantPpts%n", fullClassName);
+      return null;
+    }
+
     // Don't instrument boot classes.  They are uninteresting and will
     // not be able to access daikon.chicory.Runtime (because it is not
     // on the boot classpath).  Previously this code skipped classes
