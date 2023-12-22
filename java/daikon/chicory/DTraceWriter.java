@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import javax.management.RuntimeErrorException;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -228,10 +229,6 @@ public class DTraceWriter extends DaikonWriter {
     if (curInfo.dTraceShouldPrint()) {
       String name = curInfo.getName();
       String dtraceValueString = curInfo.getDTraceValueString(val);
-      if (!(curInfo instanceof StaticObjInfo)) {
-        outFile.println(name);
-        outFile.println(dtraceValueString);
-      }
 
       if (Chicory.problem_invariants_file != null) {
         if (Chicory.problemInvariantsVarToPollutedCleanedValue.containsKey(name)) {
@@ -244,19 +241,33 @@ public class DTraceWriter extends DaikonWriter {
 
           String valueString =
               dtraceValueString.substring(
-                  1, dtraceValueString.length() - (DaikonWriter.lineSep.length() + 2));
+                  0, dtraceValueString.length() - (DaikonWriter.lineSep.length() + 1));
+
+          if (valueString.startsWith("\"")) {
+            valueString =
+                dtraceValueString.substring(
+                    1, dtraceValueString.length() - (DaikonWriter.lineSep.length() + 2));
+          }
+
+          final String valueStringFinal = valueString;
 
           if (isEnter) {
             enterValuesAtMethod.compute(
                 methodIdentifier,
                 (_k, values) -> {
                   if (values == null) values = new ArrayList<>();
-                  values.add(new String[] {name, valueString, System.identityHashCode(val) + ""});
+                  values.add(
+                      new String[] {name, valueStringFinal, System.identityHashCode(val) + ""});
                   return values;
                 });
           } else {
             ArrayList<String[]> values = enterValuesAtMethod.get(methodIdentifier);
-            assert values != null : "No enter values for method being exited: " + methodIdentifier;
+            if (values == null) {
+              // this could be indicative of bad instrumentation, but it also could be fine. Chicory
+              // will eat this error without logging.
+              throw new RuntimeErrorException(
+                  null, "No enter values for method being exited: " + methodIdentifier);
+            }
             for (String[] value : values) {
               String otherName = value[0];
               if (otherName.equals(name)) {
@@ -294,6 +305,11 @@ public class DTraceWriter extends DaikonWriter {
 
             enterValuesAtMethod.remove(methodIdentifier);
           }
+        }
+      } else {
+        if (!(curInfo instanceof StaticObjInfo)) {
+          outFile.println(name);
+          outFile.println(dtraceValueString);
         }
       }
 
