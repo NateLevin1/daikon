@@ -172,8 +172,18 @@ public class Chicory {
           + " Chicory to a cleaner-finder mode.")
   public static @Nullable File problem_invariants_file;
 
-  public static HashMap<String, String[][]> problemInvariantsVarToPollutedCleanedValue;
-  public static ArrayList<String> problemInvariantClasses;
+  public static class PollutedCleanedVal {
+    public String[] polluted;
+    public String[] cleaned;
+
+    public PollutedCleanedVal(String[] polluted, String[] cleaned) {
+      this.polluted = polluted;
+      this.cleaned = cleaned;
+    }
+  }
+
+  public static HashMap<String, PollutedCleanedVal> problemInvVarNameToPollutedCleanedValue;
+  public static ArrayList<String> classesWithProblemInvs;
 
   @Option("The JSON file to output the discovered cleaners to.")
   public static @Nullable File cleaners_output_file;
@@ -691,20 +701,16 @@ public class Chicory {
 
   public static void loadAndParseProblemInvariantsIfNeeded() {
     // load and parse file into `problemInvariantsVarToPollutedCleanedValue`
-    if (problem_invariants_file != null && problemInvariantsVarToPollutedCleanedValue == null) {
-      problemInvariantsVarToPollutedCleanedValue = new HashMap<>();
-      problemInvariantClasses = new ArrayList<>();
+    if (problem_invariants_file != null && problemInvVarNameToPollutedCleanedValue == null) {
+      problemInvVarNameToPollutedCleanedValue = new HashMap<>();
+      classesWithProblemInvs = new ArrayList<>();
       try {
         List<String> lines = Files.readAllLines(problem_invariants_file.toPath());
-        for (String line : lines) {
-          String[] parts = line.split("!,!");
-          if (parts.length != 3) {
-            continue;
-          }
-          String ppt = parts[0];
+        while (lines.size() > 0) {
+          String ppt = lines.remove(0);
           // ppt is of the form package.Class.method():::EXIT or package.Class:::OBJECT
-          // we need to extract just the class from that, and add it to the list of classes to
-          // instrument
+          // we need to extract just the class from that, and add it to the list of
+          // classes to instrument
           String pptClass = ppt.substring(0, ppt.lastIndexOf(":::"));
           if (ppt.contains("(")) {
             // first, remove up to the method call
@@ -712,34 +718,39 @@ public class Chicory {
             // then remove the method name
             pptClass = pptClass.substring(0, pptClass.lastIndexOf("."));
           }
+          classesWithProblemInvs.add(pptClass);
 
-          problemInvariantClasses.add(pptClass);
-
-          String[] pollutedVals = parts[1].split("!\\|!");
-          String[] cleanedVals = parts[2].split("!\\|!");
-          for (String pollutedVal : pollutedVals) {
-            String[] pollutedValSplit = pollutedVal.split("!=!");
-            if (pollutedValSplit.length != 2) {
-              continue;
+          int pvCount = Integer.parseInt(lines.remove(0).split(" ")[1]);
+          for (int i = 0; i < pvCount; i++) {
+            String[] invDesc = lines.remove(0).split(" ");
+            String varName = invDesc[0];
+            int valCount = Integer.parseInt(invDesc[1]);
+            String[] vals = new String[valCount];
+            for (int j = 0; j < valCount; j++) {
+              vals[j] = lines.remove(0);
             }
-            String var = pollutedValSplit[0];
-            String[] vals = pollutedValSplit[1].split("!&!");
-            problemInvariantsVarToPollutedCleanedValue.put(var, new String[][] {vals, null});
+
+            problemInvVarNameToPollutedCleanedValue.put(
+                varName, new PollutedCleanedVal(vals, null));
           }
-          for (String cleanedVal : cleanedVals) {
-            String[] cleanedValSplit = cleanedVal.split("!=!");
-            if (cleanedValSplit.length != 2) {
-              continue;
+
+          int vCount = Integer.parseInt(lines.remove(0).split(" ")[1]);
+          for (int i = 0; i < vCount; i++) {
+            String[] invDesc = lines.remove(0).split(" ");
+            String varName = invDesc[0];
+            int valCount = Integer.parseInt(invDesc[1]);
+            String[] vals = new String[valCount];
+            for (int j = 0; j < valCount; j++) {
+              vals[j] = lines.remove(0);
             }
-            String var = cleanedValSplit[0];
-            String[] vals = cleanedValSplit[1].split("!&!");
-            String[][] pollutedCleaned = problemInvariantsVarToPollutedCleanedValue.get(var);
-            if (pollutedCleaned != null) {
-              pollutedCleaned[1] = vals;
-            }
+
+            PollutedCleanedVal existing = problemInvVarNameToPollutedCleanedValue.get(varName);
+            existing.cleaned = vals;
           }
         }
+
         System.out.println("Loaded problem invariants file! Chicory is in problem invariant mode.");
+        System.out.println(problemInvVarNameToPollutedCleanedValue);
       } catch (IOException e) {
         throw new Daikon.UserError("Error reading problem invariants file! " + e);
       }

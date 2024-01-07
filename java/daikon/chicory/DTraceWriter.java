@@ -231,7 +231,7 @@ public class DTraceWriter extends DaikonWriter {
       String dtraceValueString = curInfo.getDTraceValueString(val);
 
       if (Chicory.problem_invariants_file != null) {
-        if (Chicory.problemInvariantsVarToPollutedCleanedValue.containsKey(name)) {
+        if (Chicory.problemInvVarNameToPollutedCleanedValue.containsKey(name)) {
           String methodIdentifier =
               mi.class_info.class_name
                   + "."
@@ -263,8 +263,8 @@ public class DTraceWriter extends DaikonWriter {
           } else {
             ArrayList<String[]> values = enterValuesAtMethod.get(methodIdentifier);
             if (values == null) {
-              // this could be indicative of bad instrumentation, but it also could be fine. Chicory
-              // will eat this error without logging.
+              // this could be indicative of bad instrumentation, but it also could be fine.
+              // Chicory will eat this error without logging.
               throw new RuntimeErrorException(
                   null, "No enter values for method being exited: " + methodIdentifier);
             }
@@ -273,10 +273,10 @@ public class DTraceWriter extends DaikonWriter {
               if (otherName.equals(name)) {
                 String entryValue = value[1];
 
-                String[][] pollutedCleanedValues =
-                    Chicory.problemInvariantsVarToPollutedCleanedValue.get(name);
-                String[] pollutedValues = pollutedCleanedValues[0];
-                String[] cleanedValues = pollutedCleanedValues[1];
+                Chicory.PollutedCleanedVal pollutedCleanedValues =
+                    Chicory.problemInvVarNameToPollutedCleanedValue.get(name);
+                String[] pollutedValues = pollutedCleanedValues.polluted;
+                String[] cleanedValues = pollutedCleanedValues.cleaned;
 
                 String testMethod = getCurrentTestMethod();
 
