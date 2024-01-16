@@ -56,15 +56,15 @@ JAVADOC_COMMAND = ${JAVADOC} -cp ${DAIKON_CLASSPATH}
 ###
 
 ## Classpath
-
+RUNNER_DIR = ${DAIKONDIR}/java/runner-1.0-SNAPSHOT.jar
 ## Daikon compiled files
 ifeq "$(wildcard ${DAIKONDIR}/java/lib/daikon-plumelib.jar)" "${DAIKONDIR}/java/lib/daikon-plumelib.jar"
   # Add jar files that only exist for the development version, not the
   # distributed version, of Daikon.  The if clause avoids a (harmless but
   # annoying) javac error message that they don't exist.
-  DAIKON_CLASSPATH := ${CHECKERFRAMEWORK_JAR}:${DAIKONDIR}/java/lib/*:${DAIKONDIR}/java
-else
-  DAIKON_CLASSPATH := ${DAIKONDIR}/java
+  DAIKON_CLASSPATH := ${CHECKERFRAMEWORK_JAR}:${DAIKONDIR}/java/lib/*:${DAIKONDIR}/java:${RUNNER_DIR}
+else 
+  DAIKON_CLASSPATH := ${DAIKONDIR}/java:${RUNNER_DIR}
 endif
 
 ## Add tools.jar and rt.jar, if they exist
