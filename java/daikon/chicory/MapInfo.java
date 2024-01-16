@@ -37,24 +37,20 @@ public class MapInfo extends DaikonVariableInfo {
   public String getValueStringNonArr(Map<?, ?> val) {
     String valString;
 
-    if (val == null) {
-      valString = "\"null\"" + DaikonWriter.lineSep + "2";
+    if (val.size() < 100) {
+      valString =
+          ("\".size() == " + val.size() + "|.entrySet() == " + val.entrySet() + "\"")
+              + DaikonWriter.lineSep
+              + "1";
     } else {
-      if (val.size() < 100) {
-        valString =
-            ("\".size() == " + val.size() + "|.entrySet() == " + val.entrySet() + "\"")
-                + DaikonWriter.lineSep
-                + "1";
-      } else {
-        valString =
-            ("\".size() == "
-                    + val.size()
-                    + "|.entrySet() == "
-                    + val.entrySet().stream().limit(100).collect(Collectors.toSet())
-                    + "...\"")
-                + DaikonWriter.lineSep
-                + "1";
-      }
+      valString =
+          ("\".size() == "
+                  + val.size()
+                  + "|.entrySet() == "
+                  + val.entrySet().stream().limit(100).collect(Collectors.toSet())
+                  + "...\"")
+              + DaikonWriter.lineSep
+              + "1";
     }
 
     return valString;

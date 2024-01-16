@@ -157,8 +157,8 @@ public class Instrument extends InstructionListUtils implements ClassFileTransfo
     }
 
     Chicory.loadAndParseProblemInvariantsIfNeeded();
-    if (Chicory.problemInvariantClasses != null
-        && !Chicory.problemInvariantClasses.contains(fullClassName)) {
+    if (Chicory.classesWithProblemInvs != null
+        && !Chicory.classesWithProblemInvs.contains(fullClassName)) {
       debug_transform.log("ignoring class %s, not in problemInvariantPpts%n", fullClassName);
       return null;
     }
