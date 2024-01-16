@@ -275,10 +275,12 @@ public class DTraceWriter extends DaikonWriter {
                 if (exitIsCleaned && !entryWasPolluted) {
                   String entryMemoryLoc = value[2];
                   String exitMemoryLoc = System.identityHashCode(val) + "";
+
                   if (!entryMemoryLoc.equals(exitMemoryLoc)) {
                     Chicory.cleaners.add(
                         new Chicory.CleanerInfo(
                             "reset", mi.class_info.class_name + "." + mi.method_name, testMethod));
+                    in.natelev.runner.Runner.polluterRerunner.rerunPolluter();
                   }
                 }
 
@@ -288,6 +290,8 @@ public class DTraceWriter extends DaikonWriter {
                   Chicory.cleaners.add(
                       new Chicory.CleanerInfo(
                           "clean", mi.class_info.class_name + "." + mi.method_name, testMethod));
+                
+                  in.natelev.runner.Runner.polluterRerunner.rerunPolluter();
                 }
               }
             }
