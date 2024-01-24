@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.apache.commons.text.StringEscapeUtils;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -179,6 +180,24 @@ public class Chicory {
     public PollutedCleanedVal(String[] polluted, String[] cleaned) {
       this.polluted = polluted;
       this.cleaned = cleaned;
+    }
+
+    @Override
+    public String toString() {
+      // escape polluted w/o modifying
+      String[] escapedPolluted = new String[polluted.length];
+      for (int i = 0; i < polluted.length; i++) {
+        escapedPolluted[i] = StringEscapeUtils.escapeJava(polluted[i]);
+      }
+
+      String[] escapedCleaned = new String[cleaned.length];
+      for (int i = 0; i < cleaned.length; i++) {
+        escapedCleaned[i] = StringEscapeUtils.escapeJava(cleaned[i]);
+      }
+
+      return String.format(
+          "PollutedCleanedVal(polluted=%s, cleaned=%s)",
+          Arrays.toString(escapedPolluted), Arrays.toString(escapedCleaned));
     }
   }
 
@@ -727,7 +746,7 @@ public class Chicory {
             int valCount = Integer.parseInt(invDesc[1]);
             String[] vals = new String[valCount];
             for (int j = 0; j < valCount; j++) {
-              vals[j] = lines.remove(0);
+              vals[j] = StringEscapeUtils.unescapeJava(lines.remove(0));
             }
 
             problemInvVarNameToPollutedCleanedValue.put(
@@ -741,7 +760,7 @@ public class Chicory {
             int valCount = Integer.parseInt(invDesc[1]);
             String[] vals = new String[valCount];
             for (int j = 0; j < valCount; j++) {
-              vals[j] = lines.remove(0);
+              vals[j] = StringEscapeUtils.unescapeJava(lines.remove(0));
             }
 
             PollutedCleanedVal existing = problemInvVarNameToPollutedCleanedValue.get(varName);

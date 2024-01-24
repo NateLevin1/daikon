@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import javax.management.RuntimeErrorException;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -230,106 +229,114 @@ public class DTraceWriter extends DaikonWriter {
       String name = curInfo.getName();
       String dtraceValueString = curInfo.getDTraceValueString(val);
 
-      if (Chicory.problem_invariants_file != null) {
-        if (Chicory.problemInvVarNameToPollutedCleanedValue.containsKey(name)) {
-          String methodIdentifier =
-              mi.class_info.class_name
-                  + "."
-                  + mi.method_name
-                  + "@"
-                  + Thread.currentThread().getId();
+      try {
+        if (Chicory.problem_invariants_file != null) {
+          if (Chicory.problemInvVarNameToPollutedCleanedValue.containsKey(name)) {
+            String methodIdentifier =
+                mi.class_info.class_name
+                    + "."
+                    + mi.method_name
+                    + "@"
+                    + Thread.currentThread().getId();
 
-          String valueString =
-              dtraceValueString.substring(
-                  0, dtraceValueString.length() - (DaikonWriter.lineSep.length() + 1));
-
-          if (valueString.startsWith("\"")) {
-            valueString =
+            String valueString =
                 dtraceValueString.substring(
-                    1, dtraceValueString.length() - (DaikonWriter.lineSep.length() + 2));
-          }
+                    0, dtraceValueString.length() - (DaikonWriter.lineSep.length() + 1));
 
-          final String valueStringFinal = valueString;
-
-          if (isEnter) {
-            enterValuesAtMethod.compute(
-                methodIdentifier,
-                (_k, values) -> {
-                  if (values == null) values = new ArrayList<>();
-                  values.add(
-                      new String[] {name, valueStringFinal, System.identityHashCode(val) + ""});
-                  return values;
-                });
-          } else {
-            ArrayList<String[]> values = enterValuesAtMethod.get(methodIdentifier);
-            if (values == null) {
-              // this could be indicative of bad instrumentation, but it also could be fine.
-              // Chicory will eat this error without logging.
-              throw new RuntimeErrorException(
-                  null, "No enter values for method being exited: " + methodIdentifier);
+            if (valueString.startsWith("\"")) {
+              valueString =
+                  dtraceValueString.substring(
+                      1, dtraceValueString.length() - (DaikonWriter.lineSep.length() + 2));
             }
-            for (String[] value : values) {
-              String otherName = value[0];
-              if (otherName.equals(name)) {
-                String entryValue = value[1];
 
-                Chicory.PollutedCleanedVal pollutedCleanedValues =
-                    Chicory.problemInvVarNameToPollutedCleanedValue.get(name);
-                String[] pollutedValues = pollutedCleanedValues.polluted;
-                String[] cleanedValues = pollutedCleanedValues.cleaned;
+            final String valueStringFinal = valueString;
 
-                String testMethod = getCurrentTestMethod();
+            if (isEnter) {
+              enterValuesAtMethod.compute(
+                  methodIdentifier,
+                  (_k, values) -> {
+                    if (values == null) values = new ArrayList<>();
+                    values.add(
+                        new String[] {name, valueStringFinal, System.identityHashCode(val) + ""});
+                    return values;
+                  });
+            } else {
+              ArrayList<String[]> values = enterValuesAtMethod.get(methodIdentifier);
+              if (values == null) {
+                // this could be indicative of bad instrumentation, but it also could be fine.
+                System.out.println(
+                    "Warning: No enter values for method being exited: " + methodIdentifier);
+              } else {
+                for (String[] value : values) {
+                  String otherName = value[0];
+                  if (otherName.equals(name)) {
+                    String entryValue = value[1];
 
-                boolean entryWasPolluted = Arrays.asList(pollutedValues).contains(entryValue);
-                boolean exitIsCleaned = Arrays.asList(cleanedValues).contains(valueString);
+                    Chicory.PollutedCleanedVal pollutedCleanedValues =
+                        Chicory.problemInvVarNameToPollutedCleanedValue.get(name);
+                    String[] pollutedValues = pollutedCleanedValues.polluted;
+                    String[] cleanedValues = pollutedCleanedValues.cleaned;
 
-                if (exitIsCleaned && !entryWasPolluted) {
-                  String entryMemoryLoc = value[2];
-                  String exitMemoryLoc = System.identityHashCode(val) + "";
+                    String testMethod = getCurrentTestMethod();
 
-                  if (!entryMemoryLoc.equals(exitMemoryLoc)) {
-                    Chicory.cleaners.add(
-                        new Chicory.CleanerInfo(
-                            "reset", mi.class_info.class_name + "." + mi.method_name, testMethod));
-                    in.natelev.runner.Runner.polluterRerunner.rerunPolluter();
+                    boolean entryWasPolluted = Arrays.asList(pollutedValues).contains(entryValue);
+                    boolean exitIsCleaned = Arrays.asList(cleanedValues).contains(valueString);
+
+                    if (exitIsCleaned && !entryWasPolluted) {
+                      String entryMemoryLoc = value[2];
+                      String exitMemoryLoc = System.identityHashCode(val) + "";
+
+                      if (!entryMemoryLoc.equals(exitMemoryLoc)) {
+                        Chicory.cleaners.add(
+                            new Chicory.CleanerInfo(
+                                "reset",
+                                mi.class_info.class_name + "." + mi.method_name,
+                                testMethod));
+                        in.natelev.runner.Runner.polluterRerunner.rerunPolluter();
+                      }
+                    }
+
+                    // This method is a cleaner IF entryValue is in pollutedValues and
+                    // valueString is in cleanedValues
+                    if (entryWasPolluted && exitIsCleaned) {
+                      Chicory.cleaners.add(
+                          new Chicory.CleanerInfo(
+                              "clean",
+                              mi.class_info.class_name + "." + mi.method_name,
+                              testMethod));
+
+                      in.natelev.runner.Runner.polluterRerunner.rerunPolluter();
+                    }
                   }
                 }
-
-                // This method is a cleaner IF entryValue is in pollutedValues and
-                // valueString is in cleanedValues
-                if (entryWasPolluted && exitIsCleaned) {
-                  Chicory.cleaners.add(
-                      new Chicory.CleanerInfo(
-                          "clean", mi.class_info.class_name + "." + mi.method_name, testMethod));
-                
-                  in.natelev.runner.Runner.polluterRerunner.rerunPolluter();
-                }
               }
-            }
 
-            enterValuesAtMethod.remove(methodIdentifier);
+              enterValuesAtMethod.remove(methodIdentifier);
+            }
+          }
+        } else {
+          if (!(curInfo instanceof StaticObjInfo)) {
+            outFile.println(name);
+            outFile.println(dtraceValueString);
           }
         }
-      } else {
-        if (!(curInfo instanceof StaticObjInfo)) {
-          outFile.println(name);
-          outFile.println(dtraceValueString);
+
+        if (debug_vars) {
+          String out = dtraceValueString;
+          if (out.length() > 20) out = out.substring(0, 20);
+          System.out.printf("  --variable %s [%d]= %s%n", name, curInfo.children.size(), out);
         }
+      } catch (Exception e) {
+        e.printStackTrace();
       }
 
-      if (debug_vars) {
-        String out = dtraceValueString;
-        if (out.length() > 20) out = out.substring(0, 20);
-        System.out.printf("  --variable %s [%d]= %s%n", name, curInfo.children.size(), out);
-      }
-    }
-
-    // go through all of the current node's children
-    // and recurse on their values
-    if (curInfo.dTraceShouldPrintChildren()) {
-      for (DaikonVariableInfo child : curInfo) {
-        Object childVal = child.getMyValFromParentVal(val);
-        traverseValue(mi, child, childVal, isEnter);
+      // go through all of the current node's children
+      // and recurse on their values
+      if (curInfo.dTraceShouldPrintChildren()) {
+        for (DaikonVariableInfo child : curInfo) {
+          Object childVal = child.getMyValFromParentVal(val);
+          traverseValue(mi, child, childVal, isEnter);
+        }
       }
     }
   }
