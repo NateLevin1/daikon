@@ -229,8 +229,8 @@ public class DTraceWriter extends DaikonWriter {
       String name = curInfo.getName();
       String dtraceValueString = curInfo.getDTraceValueString(val);
 
-      try {
-        if (Chicory.problem_invariants_file != null) {
+      if (Chicory.problem_invariants_file != null) {
+        try {
           if (Chicory.problemInvVarNameToPollutedCleanedValue.containsKey(name)) {
             String methodIdentifier =
                 mi.class_info.class_name
@@ -314,29 +314,29 @@ public class DTraceWriter extends DaikonWriter {
               enterValuesAtMethod.remove(methodIdentifier);
             }
           }
-        } else {
-          if (!(curInfo instanceof StaticObjInfo)) {
-            outFile.println(name);
-            outFile.println(dtraceValueString);
-          }
+        } catch (Exception e) {
+          e.printStackTrace();
         }
-
-        if (debug_vars) {
-          String out = dtraceValueString;
-          if (out.length() > 20) out = out.substring(0, 20);
-          System.out.printf("  --variable %s [%d]= %s%n", name, curInfo.children.size(), out);
+      } else {
+        if (!(curInfo instanceof StaticObjInfo)) {
+          outFile.println(name);
+          outFile.println(dtraceValueString);
         }
-      } catch (Exception e) {
-        e.printStackTrace();
       }
 
-      // go through all of the current node's children
-      // and recurse on their values
-      if (curInfo.dTraceShouldPrintChildren()) {
-        for (DaikonVariableInfo child : curInfo) {
-          Object childVal = child.getMyValFromParentVal(val);
-          traverseValue(mi, child, childVal, isEnter);
-        }
+      if (debug_vars) {
+        String out = dtraceValueString;
+        if (out.length() > 20) out = out.substring(0, 20);
+        System.out.printf("  --variable %s [%d]= %s%n", name, curInfo.children.size(), out);
+      }
+    }
+
+    // go through all of the current node's children
+    // and recurse on their values
+    if (curInfo.dTraceShouldPrintChildren()) {
+      for (DaikonVariableInfo child : curInfo) {
+        Object childVal = child.getMyValFromParentVal(val);
+        traverseValue(mi, child, childVal, isEnter);
       }
     }
   }
