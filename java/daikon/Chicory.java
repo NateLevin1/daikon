@@ -210,9 +210,9 @@ public class Chicory {
   public static List<CleanerInfo> cleaners = new ArrayList<>();
 
   public static class CleanerInfo {
-    String type;
-    String method;
-    @Nullable String testMethod;
+    public String type;
+    public String method;
+    public @Nullable String testMethod;
 
     public CleanerInfo(String type, String method, @Nullable String testMethod) {
       this.type = type;

@@ -279,31 +279,35 @@ public class DTraceWriter extends DaikonWriter {
 
                     String testMethod = getCurrentTestMethod();
 
-                    boolean entryWasPolluted = Arrays.asList(pollutedValues).contains(entryValue);
+                    boolean entryNotInCleaned = !Arrays.asList(cleanedValues).contains(entryValue);
                     boolean exitIsCleaned = Arrays.asList(cleanedValues).contains(valueString);
 
-                    if (exitIsCleaned && !entryWasPolluted) {
+                    // detect a cleaner if the exit value is cleaned and the entry value is not in
+                    // the cleaned values
+                    if (exitIsCleaned && entryNotInCleaned) {
                       String entryMemoryLoc = value[2];
                       String exitMemoryLoc = System.identityHashCode(val) + "";
+                      String methodPath = mi.class_info.class_name + "." + mi.method_name;
+                      boolean alreadyCleaner =
+                          Chicory.cleaners.stream()
+                              .anyMatch(
+                                  (cleanerInfo) ->
+                                      cleanerInfo.method.equals(methodPath)
+                                          && (cleanerInfo.testMethod == null
+                                              ? testMethod == null
+                                              : cleanerInfo.testMethod.equals(testMethod)));
+
+                      if (alreadyCleaner) return; // FIXME: move this check earlier
 
                       if (!entryMemoryLoc.equals(exitMemoryLoc)) {
+                        // if memory location has changed, then it's a reseter
                         Chicory.cleaners.add(
-                            new Chicory.CleanerInfo(
-                                "reset",
-                                mi.class_info.class_name + "." + mi.method_name,
-                                testMethod));
-                        in.natelev.runner.Runner.polluterRerunner.rerunPolluter();
+                            new Chicory.CleanerInfo("reset", methodPath, testMethod));
+                      } else {
+                        // otherwise, it is a normal cleaner
+                        Chicory.cleaners.add(
+                            new Chicory.CleanerInfo("clean", methodPath, testMethod));
                       }
-                    }
-
-                    // This method is a cleaner IF entryValue is in pollutedValues and
-                    // valueString is in cleanedValues
-                    if (entryWasPolluted && exitIsCleaned) {
-                      Chicory.cleaners.add(
-                          new Chicory.CleanerInfo(
-                              "clean",
-                              mi.class_info.class_name + "." + mi.method_name,
-                              testMethod));
 
                       in.natelev.runner.Runner.polluterRerunner.rerunPolluter();
                     }
