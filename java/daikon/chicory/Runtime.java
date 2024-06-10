@@ -284,6 +284,10 @@ public class Runtime {
       if (capture) {
         mi.capture_cnt++;
         // long start = System.currentTimeMillis();
+        if (Chicory.prevent_dtrace_unless_victim_running
+            && !in.natelev.runner.Runner.victimRunning) {
+          return;
+        }
         if (mi.member == null) {
           dtrace_writer.clinitEntry(mi.class_info.class_name + ".<clinit>:::ENTER", nonce);
         } else {
@@ -380,6 +384,9 @@ public class Runtime {
         mi = SharedData.methods.get(mi_index);
       }
       // long start = System.currentTimeMillis();
+      if (Chicory.prevent_dtrace_unless_victim_running && !in.natelev.runner.Runner.victimRunning) {
+        return;
+      }
       if (mi.member == null) {
         dtrace_writer.clinitExit(
             mi.class_info.class_name + ".<clinit>:::EXIT" + exitLineNum, nonce);

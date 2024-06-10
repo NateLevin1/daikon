@@ -168,6 +168,9 @@ public class Chicory {
           + " under")
   public static boolean output_test_method_map = false;
 
+  @Option("Prevent printing of dtraces when in.natelev.runner.Runner.victimRunning is false")
+  public static boolean prevent_dtrace_unless_victim_running;
+
   @Option(
       "A file containing problem invariants from Takuan. Used to search for the cleaner, switches"
           + " Chicory to a cleaner-finder mode.")
@@ -750,7 +753,7 @@ public class Chicory {
             }
 
             problemInvVarNameToPollutedCleanedValue.put(
-                varName, new PollutedCleanedVal(vals, null));
+                varName, new PollutedCleanedVal(vals, new String[0]));
           }
 
           int vCount = Integer.parseInt(lines.remove(0).split(" ")[1]);

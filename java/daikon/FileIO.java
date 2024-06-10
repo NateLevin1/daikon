@@ -133,7 +133,7 @@ public final class FileIO {
    * When true, just ignore exit ppts that don't have a matching enter ppt rather than exiting with
    * an error. Unmatched exits can occur if only a portion of a dtrace file is processed.
    */
-  public static boolean dkconfig_ignore_missing_enter = false;
+  public static boolean dkconfig_ignore_missing_enter = true;
 
   /**
    * Boolean. When false, set modbits to 1 iff the printed representation has changed. When true,
