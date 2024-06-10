@@ -1,5 +1,6 @@
 package daikon.chicory;
 
+import daikon.plumelib.util.StringsPlume;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,7 +40,11 @@ public class MapInfo extends DaikonVariableInfo {
 
     if (val.size() < 100) {
       valString =
-          ("\".size() == " + val.size() + "|.entrySet() == " + val.entrySet() + "\"")
+          ("\".size() == "
+                  + val.size()
+                  + "|.entrySet() == "
+                  + StringsPlume.escapeNonASCII(val.entrySet().toString())
+                  + "\"")
               + DaikonWriter.lineSep
               + "1";
     } else {
@@ -47,7 +52,8 @@ public class MapInfo extends DaikonVariableInfo {
           ("\".size() == "
                   + val.size()
                   + "|.entrySet() == "
-                  + val.entrySet().stream().limit(100).collect(Collectors.toSet())
+                  + StringsPlume.escapeNonASCII(
+                      val.entrySet().stream().limit(100).collect(Collectors.toSet()).toString())
                   + "...\"")
               + DaikonWriter.lineSep
               + "1";
