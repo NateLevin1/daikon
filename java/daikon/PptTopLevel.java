@@ -5,7 +5,6 @@ import static daikon.PptRelation.PptRelationType;
 import static daikon.tools.nullness.NullnessUtil.castNonNullDeep;
 
 import daikon.derive.Derivation;
-import daikon.derive.binary.BinaryDerivation;
 import daikon.derive.binary.BinaryDerivationFactory;
 import daikon.derive.binary.SequenceFloatIntersectionFactory;
 import daikon.derive.binary.SequenceFloatSubscriptFactory;
@@ -22,7 +21,6 @@ import daikon.derive.binary.SequencesPredicateFactory;
 import daikon.derive.ternary.SequenceFloatArbitrarySubsequenceFactory;
 import daikon.derive.ternary.SequenceScalarArbitrarySubsequenceFactory;
 import daikon.derive.ternary.SequenceStringArbitrarySubsequenceFactory;
-import daikon.derive.ternary.TernaryDerivation;
 import daikon.derive.ternary.TernaryDerivationFactory;
 import daikon.derive.unary.SequenceInitialFactory;
 import daikon.derive.unary.SequenceInitialFactoryFloat;
@@ -822,164 +820,165 @@ public class PptTopLevel extends Ppt {
     // pair only once.  This probably isn't the most efficient technique,
     // but it's probably adequate and is not excessively complicated or
     // excessively slow.
-    for (int i1 = 0; i1 < var_infos.length; i1++) {
-      VarInfo vi1 = var_infos[i1];
-      if (!worthDerivingFrom(vi1)) {
-        if (Global.debugDerive.isLoggable(Level.FINE)) {
-          Global.debugDerive.fine("Binary first VarInfo: not worth deriving from " + vi1.name());
-        }
-        continue;
-      }
-      // This guarantees that at least one of the variables is under
-      // consideration.
-      // target1 indicates whether the first variable is under consideration.
-      boolean target1 = (i1 >= vi_index_min) && (i1 < vi_index_limit);
-      int i2_min, i2_limit;
-      if (target1) {
-        i2_min = i1 + 1;
-        i2_limit = var_infos.length;
-      } else {
-        i2_min = Math.max(i1 + 1, vi_index_min);
-        i2_limit = vi_index_limit;
-      }
-      // if (Global.debugDerive.isLoggable(Level.FINE))
-      //   Global.debugDerive.fine ("i1=" + i1
-      //                      + ", i2_min=" + i2_min
-      //                      + ", i2_limit=" + i2_limit);
-      Daikon.progress =
-          "Creating derived variables for: "
-              + ppt_name.toString()
-              + " (binary, "
-              + vi1.name()
-              + ")";
-      for (int i2 = i2_min; i2 < i2_limit; i2++) {
-        VarInfo vi2 = var_infos[i2];
-        if (!worthDerivingFrom(vi2)) {
-          if (Global.debugDerive.isLoggable(Level.FINE)) {
-            Global.debugDerive.fine(
-                "Binary: not worth deriving from (" + vi1.name() + "," + vi2.name() + ")");
-          }
-          continue;
-        }
-        for (int di = 0; di < binary.length; di++) {
-          BinaryDerivationFactory d = binary[di];
-          if (debug_bin_possible && Debug.logOn()) {
-            Debug.log(d.getClass(), vi1.ppt, Debug.vis(vi1, vi2), "Trying Binary Derivation ");
-          }
-          BinaryDerivation[] bderivs = d.instantiate(vi1, vi2);
-          if (bderivs != null) {
-            for (int bdi = 0; bdi < bderivs.length; bdi++) {
-              BinaryDerivation bderiv = bderivs[bdi];
-              if (!FileIO.var_included(bderiv.getVarInfo().name())) {
-                continue;
-              }
-              result.add(bderiv);
-              if (Debug.logOn()) {
-                Debug.log(
-                    d.getClass(),
-                    vi1.ppt,
-                    Debug.vis(vi1, vi2),
-                    "Created Binary Derivation " + bderiv.getVarInfo().name());
-              }
-            }
-          }
-        }
-      }
-    }
+    // for (int i1 = 0; i1 < var_infos.length; i1++) {
+    //   VarInfo vi1 = var_infos[i1];
+    //   if (!worthDerivingFrom(vi1)) {
+    //     if (Global.debugDerive.isLoggable(Level.FINE)) {
+    //       Global.debugDerive.fine("Binary first VarInfo: not worth deriving from " + vi1.name());
+    //     }
+    //     continue;
+    //   }
+    //   // This guarantees that at least one of the variables is under
+    //   // consideration.
+    //   // target1 indicates whether the first variable is under consideration.
+    //   boolean target1 = (i1 >= vi_index_min) && (i1 < vi_index_limit);
+    //   int i2_min, i2_limit;
+    //   if (target1) {
+    //     i2_min = i1 + 1;
+    //     i2_limit = var_infos.length;
+    //   } else {
+    //     i2_min = Math.max(i1 + 1, vi_index_min);
+    //     i2_limit = vi_index_limit;
+    //   }
+    //   // if (Global.debugDerive.isLoggable(Level.FINE))
+    //   //   Global.debugDerive.fine ("i1=" + i1
+    //   //                      + ", i2_min=" + i2_min
+    //   //                      + ", i2_limit=" + i2_limit);
+    //   Daikon.progress =
+    //       "Creating derived variables for: "
+    //           + ppt_name.toString()
+    //           + " (binary, "
+    //           + vi1.name()
+    //           + ")";
+    //   for (int i2 = i2_min; i2 < i2_limit; i2++) {
+    //     VarInfo vi2 = var_infos[i2];
+    //     if (!worthDerivingFrom(vi2)) {
+    //       if (Global.debugDerive.isLoggable(Level.FINE)) {
+    //         Global.debugDerive.fine(
+    //             "Binary: not worth deriving from (" + vi1.name() + "," + vi2.name() + ")");
+    //       }
+    //       continue;
+    //     }
+    //     for (int di = 0; di < binary.length; di++) {
+    //       BinaryDerivationFactory d = binary[di];
+    //       if (debug_bin_possible && Debug.logOn()) {
+    //         Debug.log(d.getClass(), vi1.ppt, Debug.vis(vi1, vi2), "Trying Binary Derivation ");
+    //       }
+    //       BinaryDerivation[] bderivs = d.instantiate(vi1, vi2);
+    //       if (bderivs != null) {
+    //         for (int bdi = 0; bdi < bderivs.length; bdi++) {
+    //           BinaryDerivation bderiv = bderivs[bdi];
+    //           if (!FileIO.var_included(bderiv.getVarInfo().name())) {
+    //             continue;
+    //           }
+    //           result.add(bderiv);
+    //           if (Debug.logOn()) {
+    //             Debug.log(
+    //                 d.getClass(),
+    //                 vi1.ppt,
+    //                 Debug.vis(vi1, vi2),
+    //                 "Created Binary Derivation " + bderiv.getVarInfo().name());
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
-    // Ternary derivations follow the same pattern, one level deeper.
-    for (int i1 = 0; i1 < var_infos.length; i1++) {
-      VarInfo vi1 = var_infos[i1];
-      if (vi1.isDerived()) {
-        if (Global.debugDerive.isLoggable(Level.FINE)) {
-          Global.debugDerive.fine("Ternary first VarInfo: not worth deriving from " + vi1.name());
-        }
-        continue;
-      }
-      // This guarantees that at least one of the variables is under
-      // consideration.
-      // target1 indicates whether the first variable is under consideration.
-      boolean target1 = (i1 >= vi_index_min) && (i1 < vi_index_limit);
-      int i2_min, i2_limit;
-      if (target1) {
-        i2_min = i1 + 1;
-        i2_limit = var_infos.length;
-      } else {
-        i2_min = Math.max(i1 + 1, vi_index_min);
-        i2_limit = vi_index_limit;
-      }
-      // if (Global.debugDerive.isLoggable(Level.FINE))
-      //   Global.debugDerive.fine ("i1=" + i1
-      //                      + ", i2_min=" + i2_min
-      //                      + ", i2_limit=" + i2_limit);
-      Daikon.progress =
-          "Creating derived variables for: "
-              + ppt_name.toString()
-              + " (ternary, "
-              + vi1.name()
-              + ")";
-      for (int i2 = i2_min; i2 < i2_limit; i2++) {
-        VarInfo vi2 = var_infos[i2];
-        if (vi2.isDerived()
-            || !TernaryDerivationFactory.checkType(vi1, vi2)
-            || !TernaryDerivationFactory.checkComparability(vi1, vi2)) {
-          if (Global.debugDerive.isLoggable(Level.FINE)) {
-            Global.debugDerive.fine(
-                "Ternary 2nd: not worth deriving from (" + vi1.name() + "," + vi2.name() + ")");
-          }
-          continue;
-        }
-        boolean target2 = (i2 >= vi_index_min) && (i2 < vi_index_limit);
-        int i3_min, i3_limit;
-        if (target1 || target2) {
-          i3_min = i2 + 1;
-          i3_limit = var_infos.length;
-        } else {
-          i3_min = Math.max(i2 + 1, vi_index_min);
-          i3_limit = vi_index_limit;
-        }
-        for (int i3 = i3_min; i3 < i3_limit; i3++) {
-          VarInfo vi3 = var_infos[i3];
-          if (vi3.isDerived()) {
-            if (Global.debugDerive.isLoggable(Level.FINE)) {
-              Global.debugDerive.fine(
-                  "Ternary 3rd: not worth deriving from ("
-                      + vi1.name()
-                      + ","
-                      + vi2.name()
-                      + ")"
-                      + vi3.name()
-                      + ")");
-            }
-            continue;
-          }
-          for (int di = 0; di < ternary.length; di++) {
-            TernaryDerivationFactory d = ternary[di];
-            TernaryDerivation[] tderivs = d.instantiate(vi1, vi2, vi3);
-            if (tderivs != null) {
-              for (int tdi = 0; tdi < tderivs.length; tdi++) {
-                TernaryDerivation tderiv = tderivs[tdi];
-                if (!FileIO.var_included(tderiv.getVarInfo().name())) {
-                  continue;
-                }
-                result.add(tderiv);
-              }
-            } else {
-              if (Global.debugDerive.isLoggable(Level.FINE)) {
-                Global.debugDerive.fine(
-                    "Ternary instantiated but not used: "
-                        + vi1.name()
-                        + " "
-                        + vi2.name()
-                        + " "
-                        + vi3.name()
-                        + " ");
-              }
-            }
-          }
-        }
-      }
-    }
+    // // Ternary derivations follow the same pattern, one level deeper.
+    // for (int i1 = 0; i1 < var_infos.length; i1++) {
+    //   VarInfo vi1 = var_infos[i1];
+    //   if (vi1.isDerived()) {
+    //     if (Global.debugDerive.isLoggable(Level.FINE)) {
+    //       Global.debugDerive.fine("Ternary first VarInfo: not worth deriving from " +
+    // vi1.name());
+    //     }
+    //     continue;
+    //   }
+    //   // This guarantees that at least one of the variables is under
+    //   // consideration.
+    //   // target1 indicates whether the first variable is under consideration.
+    //   boolean target1 = (i1 >= vi_index_min) && (i1 < vi_index_limit);
+    //   int i2_min, i2_limit;
+    //   if (target1) {
+    //     i2_min = i1 + 1;
+    //     i2_limit = var_infos.length;
+    //   } else {
+    //     i2_min = Math.max(i1 + 1, vi_index_min);
+    //     i2_limit = vi_index_limit;
+    //   }
+    //   // if (Global.debugDerive.isLoggable(Level.FINE))
+    //   //   Global.debugDerive.fine ("i1=" + i1
+    //   //                      + ", i2_min=" + i2_min
+    //   //                      + ", i2_limit=" + i2_limit);
+    //   Daikon.progress =
+    //       "Creating derived variables for: "
+    //           + ppt_name.toString()
+    //           + " (ternary, "
+    //           + vi1.name()
+    //           + ")";
+    //   for (int i2 = i2_min; i2 < i2_limit; i2++) {
+    //     VarInfo vi2 = var_infos[i2];
+    //     if (vi2.isDerived()
+    //         || !TernaryDerivationFactory.checkType(vi1, vi2)
+    //         || !TernaryDerivationFactory.checkComparability(vi1, vi2)) {
+    //       if (Global.debugDerive.isLoggable(Level.FINE)) {
+    //         Global.debugDerive.fine(
+    //             "Ternary 2nd: not worth deriving from (" + vi1.name() + "," + vi2.name() + ")");
+    //       }
+    //       continue;
+    //     }
+    //     boolean target2 = (i2 >= vi_index_min) && (i2 < vi_index_limit);
+    //     int i3_min, i3_limit;
+    //     if (target1 || target2) {
+    //       i3_min = i2 + 1;
+    //       i3_limit = var_infos.length;
+    //     } else {
+    //       i3_min = Math.max(i2 + 1, vi_index_min);
+    //       i3_limit = vi_index_limit;
+    //     }
+    //     for (int i3 = i3_min; i3 < i3_limit; i3++) {
+    //       VarInfo vi3 = var_infos[i3];
+    //       if (vi3.isDerived()) {
+    //         if (Global.debugDerive.isLoggable(Level.FINE)) {
+    //           Global.debugDerive.fine(
+    //               "Ternary 3rd: not worth deriving from ("
+    //                   + vi1.name()
+    //                   + ","
+    //                   + vi2.name()
+    //                   + ")"
+    //                   + vi3.name()
+    //                   + ")");
+    //         }
+    //         continue;
+    //       }
+    //       for (int di = 0; di < ternary.length; di++) {
+    //         TernaryDerivationFactory d = ternary[di];
+    //         TernaryDerivation[] tderivs = d.instantiate(vi1, vi2, vi3);
+    //         if (tderivs != null) {
+    //           for (int tdi = 0; tdi < tderivs.length; tdi++) {
+    //             TernaryDerivation tderiv = tderivs[tdi];
+    //             if (!FileIO.var_included(tderiv.getVarInfo().name())) {
+    //               continue;
+    //             }
+    //             result.add(tderiv);
+    //           }
+    //         } else {
+    //           if (Global.debugDerive.isLoggable(Level.FINE)) {
+    //             Global.debugDerive.fine(
+    //                 "Ternary instantiated but not used: "
+    //                     + vi1.name()
+    //                     + " "
+    //                     + vi2.name()
+    //                     + " "
+    //                     + vi3.name()
+    //                     + " ");
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
     if (Global.debugDerive.isLoggable(Level.FINE)) {
       Global.debugDerive.fine(
