@@ -20,6 +20,9 @@ public class ClassTypeInfo extends DaikonVariableInfo {
 
   @Override
   public String getDTraceValueString(Object val) {
+    if (val == null) {
+      return "nonsensical" + DaikonWriter.lineSep + "2";
+    }
     if (isArray) {
       // FIXME
       System.err.println("FIXME: cannot ClassNameInfo#getDTraceValueString an array yet");

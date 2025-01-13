@@ -309,7 +309,13 @@ public class DTraceWriter extends DaikonWriter {
                             new Chicory.CleanerInfo("clean", methodPath, testMethod));
                       }
 
-                      in.natelev.runner.Runner.polluterRerunner.rerunPolluter();
+                      if (in.natelev.runner.Runner.polluterRerunner == null) {
+                        System.out.println(
+                            "WARNING: tried to rerun polluter while running polluter... something"
+                                + " could be wrong");
+                      } else {
+                        in.natelev.runner.Runner.polluterRerunner.rerunPolluter();
+                      }
                     }
                   }
                 }
